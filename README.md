@@ -3,7 +3,7 @@ Simple Discord bot for snekbox, self-host or use a global instance.
 
 Work in progress
 
-![Snakeboxed logo - the Python Discord logo hovering out of a clipart cardboard box](https://github.com/JMcB17/snakeboxed/blob/main/assets/logo-1024.png)
+![Snakeboxed logo - the Python Discord logo hovering out of a clipart cardboard box](https://github.com/JMcB17/snakeboxed/blob/main/assets/logo-128.png)
 
 Requires a snekbox server, which uses docker.
 
