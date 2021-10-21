@@ -1,11 +1,15 @@
 import asyncio
+import contextlib
 import datetime
 import re
 import textwrap
 import logging as log
+from functools import partial
 from pathlib import Path
+from signal import Signals
 from typing import Optional, Tuple
 
+import aiohttp
 import discord
 import toml
 from discord.ext import commands
@@ -36,38 +40,59 @@ RAW_CODE_REGEX = re.compile(
 )
 
 MAX_PASTE_LEN = 10000
-
-CONFIG_PATH = Path('config.toml')
-
-
 SIGKILL = 9
-
 REEVAL_EMOJI = '\U0001f501'  # :repeat:
 REEVAL_TIMEOUT = 30
 
+SNEKBOX_URL = 'http://localhost:{port}/eval'
+CONFIG_PATH = Path('config.toml')
 
-class Snekbox(commands.Cog):
+
+class SnakeboxedBot(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        # assigned in on_ready for async
+        self.http_session = None
+
+        super().__init__(*args, **kwargs)
+
+    async def on_ready(self):
+        self.http_session = aiohttp.ClientSession()
+        print(f'ready as {self.user.name}')
+
+    async def close(self):
+        await super().close()
+        await self.http_session.close()
+
+
+class SnekboxCog(commands.Cog):
     """Safe evaluation of Python code using Snekbox."""
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: SnakeboxedBot, snekbox_port: int):
         self.bot = bot
         self.jobs = {}
 
+        self.snekbox_port = snekbox_port
+        self.snekbox_url = SNEKBOX_URL.format(port=self.snekbox_port)
+
     async def post_eval(self, code: str) -> dict:
         """Send a POST request to the Snekbox API to evaluate code and return the results."""
-        url = URLs.snekbox_eval_api
+        url = self.snekbox_url
         data = {"input": code}
         async with self.bot.http_session.post(url, json=data, raise_for_status=True) as resp:
             return await resp.json()
 
-    async def upload_output(self, output: str) -> Optional[str]:
+    @staticmethod
+    async def upload_output(output: str) -> Optional[str]:
         """Upload the eval output to a paste service and return a URL to it if successful."""
-        log.trace("Uploading full output to paste service...")
+        # todo: implement
+        return 'paste uploading not implemented'
 
-        if len(output) > MAX_PASTE_LEN:
-            log.info("Full output is too long to upload")
-            return "too long to upload"
-        return await send_to_paste_service(output, extension="txt")
+        # log.info("Uploading full output to paste service...")
+        #
+        # if len(output) > MAX_PASTE_LEN:
+        #     log.info("Full output is too long to upload")
+        #     return "too long to upload"
+        # return await send_to_paste_service(output, extension="txt")
 
     @staticmethod
     def prepare_input(code: str) -> str:
@@ -95,7 +120,7 @@ class Snekbox(commands.Cog):
             info = "unformatted or badly formatted code"
 
         code = textwrap.dedent(code)
-        log.trace(f"Extracted {info} for evaluation:\n{code}")
+        log.info(f"Extracted {info} for evaluation:\n{code}")
         return code
 
     @staticmethod
@@ -139,7 +164,7 @@ class Snekbox(commands.Cog):
         Prepend each line with a line number. Truncate if there are over 10 lines or 1000 characters
         and upload the full output to a paste service.
         """
-        log.trace("Formatting output...")
+        log.info("Formatting output...")
 
         output = output.rstrip("\n")
         original_output = output  # To be uploaded to a pasting service if needed
@@ -199,15 +224,7 @@ class Snekbox(commands.Cog):
             if paste_link:
                 msg = f"{msg}\nFull output: {paste_link}"
 
-            filter_cog = self.bot.get_cog("Filtering")
-            filter_triggered = False
-            if filter_cog:
-                filter_triggered = await filter_cog.filter_eval(msg, ctx.message)
-            if filter_triggered:
-                response = await ctx.send("Attempt to circumvent filter detected. Moderator team has been alerted.")
-            else:
-                response = await ctx.send(msg)
-            scheduling.create_task(wait_for_deletion(response, (ctx.author.id,)), event_loop=self.bot.loop)
+            response = await ctx.send(msg)
 
             log.info(f"{ctx.author}'s job had a return code of {results['returncode']}")
         return response
@@ -220,7 +237,7 @@ class Snekbox(commands.Cog):
         _predicate_eval_message_edit = partial(predicate_eval_message_edit, ctx)
         _predicate_emoji_reaction = partial(predicate_eval_emoji_reaction, ctx)
 
-        with contextlib.suppress(NotFound):
+        with contextlib.suppress(discord.NotFound):
             try:
                 _, new_message = await self.bot.wait_for(
                     'message_edit',
@@ -236,7 +253,7 @@ class Snekbox(commands.Cog):
 
                 code = await self.get_code(new_message)
                 await ctx.message.clear_reaction(REEVAL_EMOJI)
-                with contextlib.suppress(HTTPException):
+                with contextlib.suppress(discord.HTTPException):
                     await response.delete()
 
             except asyncio.TimeoutError:
@@ -251,15 +268,15 @@ class Snekbox(commands.Cog):
         If the message is an invocation of the eval command, return the first argument or None if it
         doesn't exist. Otherwise, return the full content of the message.
         """
-        log.trace(f"Getting context for message {message.id}.")
+        log.info(f"Getting context for message {message.id}.")
         new_ctx = await self.bot.get_context(message)
 
         if new_ctx.command is self.eval_command:
-            log.trace(f"Message {message.id} invokes eval command.")
+            log.info(f"Message {message.id} invokes eval command.")
             split = message.content.split(maxsplit=1)
             code = split[1] if len(split) > 1 else None
         else:
-            log.trace(f"Message {message.id} does not invoke eval command.")
+            log.info(f"Message {message.id} does not invoke eval command.")
             code = message.content
 
         return code
@@ -302,9 +319,14 @@ class Snekbox(commands.Cog):
             log.info(f"Re-evaluating code from message {ctx.message.id}:\n{code}")
 
 
-class SnakeboxedBot(commands.Bot):
-    async def on_ready(self):
-        print(f'ready as {self.user.name}')
+def predicate_eval_message_edit(ctx: commands.Context, old_msg: discord.Message, new_msg: discord.Message) -> bool:
+    """Return True if the edited message is the context message and the content was indeed modified."""
+    return new_msg.id == ctx.message.id and old_msg.content != new_msg.content
+
+
+def predicate_eval_emoji_reaction(ctx: commands.Context, reaction: discord.Reaction, user: discord.User) -> bool:
+    """Return True if the reaction REEVAL_EMOJI was added by the context message author on this message."""
+    return reaction.message.id == ctx.message.id and user.id == ctx.author.id and str(reaction) == REEVAL_EMOJI
 
 
 def main():
@@ -312,6 +334,8 @@ def main():
         config = toml.load(config_file)
 
     bot = SnakeboxedBot(command_prefix='!')
+    snekbox_cog = SnekboxCog(bot, snekbox_port=config['settings']['snekbox_port'])
+    bot.add_cog(snekbox_cog)
     bot.run(config['auth']['token'])
 
 
