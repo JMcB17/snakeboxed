@@ -46,6 +46,15 @@ REEVAL_TIMEOUT = 30
 
 SNEKBOX_URL = 'http://localhost:{port}/eval'
 CONFIG_PATH = Path('config.toml')
+# todo: check these
+BOT_PERMISSIONS = {
+    'read_messages': True,
+    'send_message': True,
+    'add_reactions': True,
+    # will be used instead of pastebin I think
+    'attach_files': True,
+    'manage_messages': True
+}
 
 
 class SnakeboxedBot(commands.Bot):
@@ -73,6 +82,21 @@ class SnekboxCog(commands.Cog):
 
         self.snekbox_port = snekbox_port
         self.snekbox_url = SNEKBOX_URL.format(port=self.snekbox_port)
+
+    @commands.command(name='invite-bot', aliases=['bot-invite', 'invite'], hidden=True)
+    async def invite_bot(self, ctx: commands.Context):
+        """Send a discord bot invite for this bot.
+
+        Uses the bot's current client id and some required permissions.
+        """
+        app_info = await self.bot.application_info()
+        client_id = app_info.id
+
+        permissions = discord.Permissions()
+        permissions.update(**BOT_PERMISSIONS)
+
+        invite_url = discord.utils.oauth_url(client_id, permissions, ctx.guild)
+        await ctx.send(invite_url)
 
     async def post_eval(self, code: str) -> dict:
         """Send a POST request to the Snekbox API to evaluate code and return the results."""
