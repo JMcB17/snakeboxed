@@ -357,7 +357,7 @@ def main():
     with open(CONFIG_PATH) as config_file:
         config = toml.load(config_file)
 
-    bot = SnakeboxedBot(command_prefix='!')
+    bot = SnakeboxedBot(command_prefix=config['settings']['command_prefixes'])
     snekbox_cog = SnekboxCog(bot, snekbox_port=config['settings']['snekbox_port'])
     bot.add_cog(snekbox_cog)
     bot.run(config['auth']['token'])
