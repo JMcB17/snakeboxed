@@ -1,0 +1,5 @@
+[auth]
+token = ""
+
+[settings]
+snekbox_port = 8060
