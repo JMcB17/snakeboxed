@@ -46,7 +46,7 @@ REEVAL_TIMEOUT = 30
 
 SNEKBOX_URL = 'http://localhost:{port}/eval'
 CONFIG_PATH = Path('config.toml')
-# todo: check these
+LOG_PATH = Path('info.log')
 BOT_PERMISSIONS = {
     'read_messages': True,
     'send_message': True,
@@ -55,6 +55,17 @@ BOT_PERMISSIONS = {
     'attach_files': True,
     'manage_messages': True
 }
+
+
+stream_handler = log.StreamHandler()
+file_handler = log.FileHandler(LOG_PATH, encoding='utf_8')
+log.basicConfig(
+    level=log.INFO,
+    handlers=[
+        stream_handler,
+        file_handler,
+    ]
+)
 
 
 class SnakeboxedBot(commands.Bot):
@@ -66,7 +77,7 @@ class SnakeboxedBot(commands.Bot):
 
     async def on_ready(self):
         self.http_session = aiohttp.ClientSession()
-        print(f'ready as {self.user.name}')
+        log.info(f'ready as {self.user.name}')
 
     async def close(self):
         await super().close()
