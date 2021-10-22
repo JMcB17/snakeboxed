@@ -1,6 +1,7 @@
 import asyncio
 import contextlib
 import datetime
+import io
 import re
 import textwrap
 import logging as log
@@ -39,7 +40,6 @@ RAW_CODE_REGEX = re.compile(
     re.DOTALL                               # "." also matches newlines
 )
 
-MAX_PASTE_LEN = 10000
 SIGKILL = 9
 REEVAL_EMOJI = '\U0001f501'  # :repeat:
 REEVAL_TIMEOUT = 30
@@ -55,6 +55,8 @@ BOT_PERMISSIONS = {
     'attach_files': True,
     'manage_messages': True
 }
+MAX_DISCORD_FILE_LENGTH_BYTES = 8 * (10 ** 6)  # 8MB
+DISCORD_FILE_NAME = 'output.txt'
 
 
 stream_handler = log.StreamHandler()
@@ -119,17 +121,22 @@ class SnekboxCog(commands.Cog):
             return await resp.json()
 
     @staticmethod
-    async def upload_output(output: str) -> Optional[str]:
+    async def upload_output(output: str) -> Optional[discord.File]:
         """Upload the eval output to a paste service and return a URL to it if successful."""
-        # todo: implement
         return 'paste uploading not implemented'
 
-        # log.info("Uploading full output to paste service...")
-        #
-        # if len(output) > MAX_PASTE_LEN:
-        #     log.info("Full output is too long to upload")
-        #     return "too long to upload"
-        # return await send_to_paste_service(output, extension="txt")
+        log.info("Uploading full output to discord file...")
+
+        output_bytes = output.encode(encoding='utf_8')
+        if len(output_bytes) > MAX_DISCORD_FILE_LENGTH_BYTES:
+            log.info("Full output is too long to upload")
+            return "too long to upload"
+
+        output_bytes_io = io.BytesIO(output_bytes)
+        output_bytes_io.seek(0)
+        output_discord_file = discord.File(output_bytes_io, filename=DISCORD_FILE_NAME)
+
+        return output_discord_file
 
     @staticmethod
     def prepare_input(code: str) -> str:
