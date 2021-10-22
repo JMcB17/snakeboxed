@@ -73,6 +73,7 @@ class SnakeboxedBot(commands.Bot):
         # assigned in on_ready for async
         self.http_session = None
 
+        kwargs.setdefault('help_command', commands.DefaultHelpCommand(no_category='Help'))
         super().__init__(*args, **kwargs)
 
     async def on_ready(self):
@@ -86,6 +87,7 @@ class SnakeboxedBot(commands.Bot):
 
 class SnekboxCog(commands.Cog):
     """Safe evaluation of Python code using Snekbox."""
+    qualified_name = 'Snekbox'
 
     def __init__(self, bot: SnakeboxedBot, snekbox_port: int):
         self.bot = bot

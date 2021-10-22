@@ -1,5 +1,5 @@
 # snakeboxed
-Simple Discord bot for snekbox (Python code execution), self-host or use a global instance.
+Simple Discord bot for snekbox (sandboxed Python code execution), self-host or use a global instance.
 
 Work in progress
 
