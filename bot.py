@@ -24,7 +24,7 @@ from discord.ext import commands
 # todo: settings system for global hosting
 
 
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 
 
 ESCAPE_REGEX = re.compile('[`\u202E\u200B]{3,}')
@@ -111,7 +111,7 @@ class InfoCog(commands.Cog):
 
     @commands.command(name='bugs', aliases=['bug', 'report-bug', 'report-bugs', 'bug-report'])
     async def send_bug_report_links(self, ctx: commands.Context):
-        """Send the GitHub link for this bot's source code."""
+        """Send info on reporting bugs."""
         bug_report_msg = (
             'Message me on Discord: \n'
             'JMcB#7918\n '
@@ -119,6 +119,11 @@ class InfoCog(commands.Cog):
             f'<{self.github_link}/issues/new>'
         )
         return await ctx.send(bug_report_msg)
+
+    @commands.command(name='version', aliases=['V'])
+    async def send_version_number(self, ctx: commands.Context):
+        """Send the current version number for this bot."""
+        return await ctx.send(__version__)
 
     @commands.command(name='prefix', aliases=['prefixes', 'bot-prefix', 'bot-prefixes'])
     async def send_bot_prefixes(self, ctx: commands.Context):
