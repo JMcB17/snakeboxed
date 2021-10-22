@@ -3,7 +3,7 @@ Simple Discord bot for snekbox (sandboxed Python code execution), self-host or u
 
 Work in progress
 
-Add it to your server: https://discord.com/oauth2/authorize?client_id=900808633472933978&scope=bot&permissions=42048
+https://discord.com/oauth2/authorize?client_id=900808633472933978&scope=bot&permissions=35904
 
 ![Snakeboxed logo - the Python Discord logo hovering out of a clipart cardboard box](https://github.com/JMcB17/snakeboxed/blob/main/assets/logo-128.png)
 

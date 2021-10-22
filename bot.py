@@ -53,10 +53,9 @@ CONFIG_PATH = Path('config.toml')
 LOG_PATH = Path('info.log')
 BOT_PERMISSIONS = {
     'read_messages': True,
-    'send_message': True,
+    'send_messages': True,
     'add_reactions': True,
     'attach_files': True,
-    'manage_messages': True
 }
 MAX_DISCORD_FILE_LENGTH_BYTES = 8 * (10 ** 6)  # 8MB
 DISCORD_FILE_NAME = 'output.txt'
