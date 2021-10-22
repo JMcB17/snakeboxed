@@ -122,7 +122,7 @@ class SnekboxCog(commands.Cog):
     @staticmethod
     async def output_to_discord_file(output: str) -> Optional[discord.File]:
         """Upload the eval output to a Discord file and return it if successful."""
-        log.info('Uploading full output to discord file...')
+        log.info('Uploading full output to Discord file...')
 
         output_bytes = output.encode(encoding='utf_8')
         if len(output_bytes) > MAX_DISCORD_FILE_LENGTH_BYTES:
@@ -232,12 +232,12 @@ class SnekboxCog(commands.Cog):
         if lines > 10:
             truncated = True
             if len(output) >= 1000:
-                output = f'{output[:1000]}\n... (truncated - too long, too many lines)'
+                output = '... (truncated - too long, too many lines)'
             else:
-                output = f'{output}\n... (truncated - too many lines)'
+                output = '... (truncated - too many lines)'
         elif len(output) >= 1000:
             truncated = True
-            output = f'{output[:1000]}\n... (truncated - too long)'
+            output = '... (truncated - too long)'
 
         if truncated:
             discord_file = await self.output_to_discord_file(original_output)
