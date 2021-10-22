@@ -109,6 +109,17 @@ class InfoCog(commands.Cog):
         """Send the GitHub link for this bot's source code."""
         return await ctx.send(f'<{self.github_link}>')
 
+    @commands.command(name='bugs', aliases=['bug', 'report-bug', 'report-bugs', 'bug-report'])
+    async def send_bug_report_links(self, ctx: commands.Context):
+        """Send the GitHub link for this bot's source code."""
+        bug_report_msg = (
+            'Message me on Discord: \n'
+            'JMcB#7918\n '
+            'Open an issue on GitHub:\n '
+            f'<{self.github_link}/issues/new>'
+        )
+        return await ctx.send(bug_report_msg)
+
     @commands.command(name='prefix', aliases=['prefixes', 'bot-prefix', 'bot-prefixes'])
     async def send_bot_prefixes(self, ctx: commands.Context):
         """Send the command prefixes for this bot.
