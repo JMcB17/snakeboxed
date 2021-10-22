@@ -51,7 +51,6 @@ BOT_PERMISSIONS = {
     'read_messages': True,
     'send_message': True,
     'add_reactions': True,
-    # will be used instead of pastebin I think
     'attach_files': True,
     'manage_messages': True
 }
@@ -121,16 +120,14 @@ class SnekboxCog(commands.Cog):
             return await resp.json()
 
     @staticmethod
-    async def upload_output(output: str) -> Optional[discord.File]:
-        """Upload the eval output to a paste service and return a URL to it if successful."""
-        return 'paste uploading not implemented'
-
+    async def output_to_discord_file(output: str) -> Optional[discord.File]:
+        """Upload the eval output to a Discord file and return it if successful."""
         log.info('Uploading full output to discord file...')
 
         output_bytes = output.encode(encoding='utf_8')
         if len(output_bytes) > MAX_DISCORD_FILE_LENGTH_BYTES:
             log.info('Full output is too long to upload')
-            return 'too long to upload'
+            output_bytes = b'too long to upload'
 
         output_bytes_io = io.BytesIO(output_bytes)
         output_bytes_io.seek(0)
@@ -202,17 +199,17 @@ class SnekboxCog(commands.Cog):
         else:  # Exception
             return ':x:'
 
-    async def format_output(self, output: str) -> Tuple[str, Optional[str]]:
+    async def format_output(self, output: str) -> Tuple[str, Optional[discord.File]]:
         """
         Format the output and return a tuple of the formatted output and a URL to the full output.
         Prepend each line with a line number. Truncate if there are over 10 lines or 1000 characters
-        and upload the full output to a paste service.
+        and upload the full output to a Discord file.
         """
         log.info('Formatting output...')
 
         output = output.rstrip('\n')
-        original_output = output  # To be uploaded to a pasting service if needed
-        paste_link = None
+        original_output = output  # To be uploaded to a Discord file if needed
+        discord_file = None
 
         if '<@' in output:
             output = output.replace('<@', '<@\u200B')  # Zero-width space
@@ -221,8 +218,8 @@ class SnekboxCog(commands.Cog):
             output = output.replace('<!@', '<!@\u200B')  # Zero-width space
 
         if ESCAPE_REGEX.findall(output):
-            paste_link = await self.upload_output(original_output)
-            return 'Code block escape attempt detected; will not output result', paste_link
+            discord_file = await self.output_to_discord_file(original_output)
+            return 'Code block escape attempt detected; will not output result', discord_file
 
         truncated = False
         lines = output.count('\n')
@@ -243,11 +240,11 @@ class SnekboxCog(commands.Cog):
             output = f'{output[:1000]}\n... (truncated - too long)'
 
         if truncated:
-            paste_link = await self.upload_output(original_output)
+            discord_file = await self.output_to_discord_file(original_output)
 
         output = output or '[No output]'
 
-        return output, paste_link
+        return output, discord_file
 
     async def send_eval(self, ctx: commands.Context, code: str) -> discord.Message:
         """
@@ -259,16 +256,16 @@ class SnekboxCog(commands.Cog):
             msg, error = self.get_results_message(results)
 
             if error:
-                output, paste_link = error, None
+                output, discord_file = error, None
             else:
-                output, paste_link = await self.format_output(results['stdout'])
+                output, discord_file = await self.format_output(results['stdout'])
 
             icon = self.get_status_emoji(results)
             msg = f'{ctx.author.mention} {icon} {msg}.\n\n```\n{output}\n```'
-            if paste_link:
-                msg = f'{msg}\nFull output: {paste_link}'
-
-            response = await ctx.send(msg)
+            if discord_file:
+                response = await ctx.send(f'{msg}\nFull output: ', file=discord_file)
+            else:
+                response = await ctx.send(msg)
 
             log.info(f"{ctx.author}'s job had a return code of {results['returncode']}")
         return response
