@@ -24,7 +24,7 @@ from discord.ext import commands
 # todo: settings system for global hosting
 
 
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 
 
 ESCAPE_REGEX = re.compile('[`\u202E\u200B]{3,}')
@@ -56,6 +56,7 @@ BOT_PERMISSIONS = {
     'send_messages': True,
     'add_reactions': True,
     'attach_files': True,
+    'manage_messages': True,
 }
 MAX_DISCORD_FILE_LENGTH_BYTES = 8 * (10 ** 6)  # 8MB
 DISCORD_FILE_NAME = 'output.txt'
