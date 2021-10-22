@@ -23,21 +23,21 @@ from discord.ext import commands
 __version__ = '0.1.0'
 
 
-ESCAPE_REGEX = re.compile("[`\u202E\u200B]{3,}")
+ESCAPE_REGEX = re.compile('[`\u202E\u200B]{3,}')
 FORMATTED_CODE_REGEX = re.compile(
-    r"(?P<delim>(?P<block>```)|``?)"        # code delimiter: 1-3 backticks; (?P=block) only matches if it's a block
-    r"(?(block)(?:(?P<lang>[a-z]+)\n)?)"    # if we're in a block, match optional language (only letters plus newline)
-    r"(?:[ \t]*\n)*"                        # any blank (empty or tabs/spaces only) lines before the code
-    r"(?P<code>.*?)"                        # extract all code inside the markup
-    r"\s*"                                  # any more whitespace before the end of the code markup
-    r"(?P=delim)",                          # match the exact same delimiter from the start again
-    re.DOTALL | re.IGNORECASE               # "." also matches newlines, case insensitive
+    r'(?P<delim>(?P<block>```)|``?)'        # code delimiter: 1-3 backticks; (?P=block) only matches if it's a block
+    r'(?(block)(?:(?P<lang>[a-z]+)\n)?)'    # if we're in a block, match optional language (only letters plus newline)
+    r'(?:[ \t]*\n)*'                        # any blank (empty or tabs/spaces only) lines before the code
+    r'(?P<code>.*?)'                        # extract all code inside the markup
+    r'\s*'                                  # any more whitespace before the end of the code markup
+    r'(?P=delim)',                          # match the exact same delimiter from the start again
+    re.DOTALL | re.IGNORECASE               # '.' also matches newlines, case insensitive
 )
 RAW_CODE_REGEX = re.compile(
-    r"^(?:[ \t]*\n)*"                       # any blank (empty or tabs/spaces only) lines before the code
-    r"(?P<code>.*?)"                        # extract all the rest as code
-    r"\s*$",                                # any trailing whitespace until the end of the string
-    re.DOTALL                               # "." also matches newlines
+    r'^(?:[ \t]*\n)*'                       # any blank (empty or tabs/spaces only) lines before the code
+    r'(?P<code>.*?)'                        # extract all the rest as code
+    r'\s*$',                                # any trailing whitespace until the end of the string
+    re.DOTALL                               # '.' also matches newlines
 )
 
 SIGKILL = 9
@@ -116,7 +116,7 @@ class SnekboxCog(commands.Cog):
     async def post_eval(self, code: str) -> dict:
         """Send a POST request to the Snekbox API to evaluate code and return the results."""
         url = self.snekbox_url
-        data = {"input": code}
+        data = {'input': code}
         async with self.bot.http_session.post(url, json=data, raise_for_status=True) as resp:
             return await resp.json()
 
@@ -125,12 +125,12 @@ class SnekboxCog(commands.Cog):
         """Upload the eval output to a paste service and return a URL to it if successful."""
         return 'paste uploading not implemented'
 
-        log.info("Uploading full output to discord file...")
+        log.info('Uploading full output to discord file...')
 
         output_bytes = output.encode(encoding='utf_8')
         if len(output_bytes) > MAX_DISCORD_FILE_LENGTH_BYTES:
-            log.info("Full output is too long to upload")
-            return "too long to upload"
+            log.info('Full output is too long to upload')
+            return 'too long to upload'
 
         output_bytes_io = io.BytesIO(output_bytes)
         output_bytes_io.seek(0)
@@ -147,46 +147,46 @@ class SnekboxCog(commands.Cog):
         If there are several fenced code blocks, concatenate only the fenced code blocks.
         """
         if match := list(FORMATTED_CODE_REGEX.finditer(code)):
-            blocks = [block for block in match if block.group("block")]
+            blocks = [block for block in match if block.group('block')]
 
             if len(blocks) > 1:
-                code = '\n'.join(block.group("code") for block in blocks)
-                info = "several code blocks"
+                code = '\n'.join(block.group('code') for block in blocks)
+                info = 'several code blocks'
             else:
                 match = match[0] if len(blocks) == 0 else blocks[0]
-                code, block, lang, delim = match.group("code", "block", "lang", "delim")
+                code, block, lang, delim = match.group('code', 'block', 'lang', 'delim')
                 if block:
-                    info = (f"'{lang}' highlighted" if lang else "plain") + " code block"
+                    info = (f"'{lang}' highlighted" if lang else 'plain') + ' code block'
                 else:
-                    info = f"{delim}-enclosed inline code"
+                    info = f'{delim}-enclosed inline code'
         else:
-            code = RAW_CODE_REGEX.fullmatch(code).group("code")
-            info = "unformatted or badly formatted code"
+            code = RAW_CODE_REGEX.fullmatch(code).group('code')
+            info = 'unformatted or badly formatted code'
 
         code = textwrap.dedent(code)
-        log.info(f"Extracted {info} for evaluation:\n{code}")
+        log.info(f'Extracted {info} for evaluation:\n{code}')
         return code
 
     @staticmethod
     def get_results_message(results: dict) -> Tuple[str, str]:
         """Return a user-friendly message and error corresponding to the process's return code."""
-        stdout, returncode = results["stdout"], results["returncode"]
-        msg = f"Your eval job has completed with return code {returncode}"
+        stdout, returncode = results['stdout'], results['returncode']
+        msg = f'Your eval job has completed with return code {returncode}'
         error = ""
 
         if returncode is None:
-            msg = "Your eval job has failed"
+            msg = 'Your eval job has failed'
             error = stdout.strip()
         elif returncode == 128 + SIGKILL:
-            msg = "Your eval job timed out or ran out of memory"
+            msg = 'Your eval job timed out or ran out of memory'
         elif returncode == 255:
-            msg = "Your eval job has failed"
-            error = "A fatal NsJail error occurred"
+            msg = 'Your eval job has failed'
+            error = 'A fatal NsJail error occurred'
         else:
             # Try to append signal's name if one exists
             try:
                 name = Signals(returncode - 128).name
-                msg = f"{msg} ({name})"
+                msg = f'{msg} ({name})'
             except ValueError:
                 pass
 
@@ -195,12 +195,12 @@ class SnekboxCog(commands.Cog):
     @staticmethod
     def get_status_emoji(results: dict) -> str:
         """Return an emoji corresponding to the status code or lack of output in result."""
-        if not results["stdout"].strip():  # No output
-            return ":warning:"
-        elif results["returncode"] == 0:  # No error
-            return ":white_check_mark:"
+        if not results['stdout'].strip():  # No output
+            return ':warning:'
+        elif results['returncode'] == 0:  # No error
+            return ':white_check_mark:'
         else:  # Exception
-            return ":x:"
+            return ':x:'
 
     async def format_output(self, output: str) -> Tuple[str, Optional[str]]:
         """
@@ -208,44 +208,44 @@ class SnekboxCog(commands.Cog):
         Prepend each line with a line number. Truncate if there are over 10 lines or 1000 characters
         and upload the full output to a paste service.
         """
-        log.info("Formatting output...")
+        log.info('Formatting output...')
 
-        output = output.rstrip("\n")
+        output = output.rstrip('\n')
         original_output = output  # To be uploaded to a pasting service if needed
         paste_link = None
 
-        if "<@" in output:
-            output = output.replace("<@", "<@\u200B")  # Zero-width space
+        if '<@' in output:
+            output = output.replace('<@', '<@\u200B')  # Zero-width space
 
-        if "<!@" in output:
-            output = output.replace("<!@", "<!@\u200B")  # Zero-width space
+        if '<!@' in output:
+            output = output.replace('<!@', '<!@\u200B')  # Zero-width space
 
         if ESCAPE_REGEX.findall(output):
             paste_link = await self.upload_output(original_output)
-            return "Code block escape attempt detected; will not output result", paste_link
+            return 'Code block escape attempt detected; will not output result', paste_link
 
         truncated = False
-        lines = output.count("\n")
+        lines = output.count('\n')
 
         if lines > 0:
-            output = [f"{i:03d} | {line}" for i, line in enumerate(output.split('\n'), 1)]
+            output = [f'{i:03d} | {line}' for i, line in enumerate(output.split('\n'), 1)]
             output = output[:11]  # Limiting to only 11 lines
-            output = "\n".join(output)
+            output = '\n'.join(output)
 
         if lines > 10:
             truncated = True
             if len(output) >= 1000:
-                output = f"{output[:1000]}\n... (truncated - too long, too many lines)"
+                output = f'{output[:1000]}\n... (truncated - too long, too many lines)'
             else:
-                output = f"{output}\n... (truncated - too many lines)"
+                output = f'{output}\n... (truncated - too many lines)'
         elif len(output) >= 1000:
             truncated = True
-            output = f"{output[:1000]}\n... (truncated - too long)"
+            output = f'{output[:1000]}\n... (truncated - too long)'
 
         if truncated:
             paste_link = await self.upload_output(original_output)
 
-        output = output or "[No output]"
+        output = output or '[No output]'
 
         return output, paste_link
 
@@ -261,12 +261,12 @@ class SnekboxCog(commands.Cog):
             if error:
                 output, paste_link = error, None
             else:
-                output, paste_link = await self.format_output(results["stdout"])
+                output, paste_link = await self.format_output(results['stdout'])
 
             icon = self.get_status_emoji(results)
-            msg = f"{ctx.author.mention} {icon} {msg}.\n\n```\n{output}\n```"
+            msg = f'{ctx.author.mention} {icon} {msg}.\n\n```\n{output}\n```'
             if paste_link:
-                msg = f"{msg}\nFull output: {paste_link}"
+                msg = f'{msg}\nFull output: {paste_link}'
 
             response = await ctx.send(msg)
 
@@ -312,20 +312,20 @@ class SnekboxCog(commands.Cog):
         If the message is an invocation of the eval command, return the first argument or None if it
         doesn't exist. Otherwise, return the full content of the message.
         """
-        log.info(f"Getting context for message {message.id}.")
+        log.info(f'Getting context for message {message.id}.')
         new_ctx = await self.bot.get_context(message)
 
         if new_ctx.command is self.eval_command:
-            log.info(f"Message {message.id} invokes eval command.")
+            log.info(f'Message {message.id} invokes eval command.')
             split = message.content.split(maxsplit=1)
             code = split[1] if len(split) > 1 else None
         else:
-            log.info(f"Message {message.id} does not invoke eval command.")
+            log.info(f'Message {message.id} does not invoke eval command.')
             code = message.content
 
         return code
 
-    @commands.command(name="eval", aliases=("e",))
+    @commands.command(name='eval', aliases=('e',))
     @commands.guild_only()
     async def eval_command(self, ctx: commands.Context, *, code: str = None) -> None:
         """
@@ -339,7 +339,7 @@ class SnekboxCog(commands.Cog):
         if ctx.author.id in self.jobs:
             await ctx.send(
                 f"{ctx.author.mention} You've already got a job running - "
-                "please wait for it to finish!"
+                'please wait for it to finish!'
             )
             return
 
@@ -347,7 +347,7 @@ class SnekboxCog(commands.Cog):
             await ctx.send_help(ctx.command)
             return
 
-        log.info(f"Received code from {ctx.author} for evaluation:\n{code}")
+        log.info(f'Received code from {ctx.author} for evaluation:\n{code}')
 
         while True:
             self.jobs[ctx.author.id] = datetime.datetime.now()
@@ -360,7 +360,7 @@ class SnekboxCog(commands.Cog):
             code = await self.continue_eval(ctx, response)
             if not code:
                 break
-            log.info(f"Re-evaluating code from message {ctx.message.id}:\n{code}")
+            log.info(f'Re-evaluating code from message {ctx.message.id}:\n{code}')
 
 
 def predicate_eval_message_edit(ctx: commands.Context, old_msg: discord.Message, new_msg: discord.Message) -> bool:
