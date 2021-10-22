@@ -388,17 +388,24 @@ def predicate_eval_emoji_reaction(ctx: commands.Context, reaction: discord.React
     return reaction.message.id == ctx.message.id and user.id == ctx.author.id and str(reaction) == REEVAL_EMOJI
 
 
-def main():
-    """Run an instance of the bot with config loaded from the toml file."""
+def get_config() -> dict:
     with open(CONFIG_PATH, encoding='utf_8') as config_file:
         config = toml.load(config_file)
+    return config
 
-    bot = SnakeboxedBot(command_prefix=config['settings']['command_prefixes'])
 
-    invite_cog = InviteCog(bot)
-    bot.add_cog(invite_cog)
+def main():
+    """Run an instance of the bot with config loaded from the toml file."""
+    config = get_config()
+
+    bot = SnakeboxedBot(
+        command_prefix=commands.when_mentioned_or(*config['settings']['command_prefixes'])
+    )
+
     snekbox_cog = SnekboxCog(bot, snekbox_port=config['settings']['snekbox_port'])
     bot.add_cog(snekbox_cog)
+    invite_cog = InviteCog(bot)
+    bot.add_cog(invite_cog)
 
     bot.run(config['auth']['token'])
 
