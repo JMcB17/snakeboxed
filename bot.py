@@ -1,3 +1,6 @@
+"""Simple Discord bot for snekbox (sandboxed Python code execution), self-host or use a global instance."""
+
+
 import asyncio
 import contextlib
 import datetime
@@ -71,6 +74,12 @@ log.basicConfig(
 
 
 class SnakeboxedBot(commands.Bot):
+    """Custom Bot class for the Snekbox cog.
+
+    Adds http_session as an attribute, which is an aiohttp.ClientSession requried by the Snekbox cog.
+    Also uses a help command with a custom no_category.
+    """
+
     def __init__(self, *args, **kwargs):
         # assigned in on_ready for async
         self.http_session = None
@@ -112,6 +121,7 @@ class InviteCog(commands.Cog):
 
 class SnekboxCog(commands.Cog):
     """Safe evaluation of Python code using Snekbox."""
+
     qualified_name = 'Snekbox'
 
     def __init__(self, bot: SnakeboxedBot, snekbox_port: int):
@@ -380,7 +390,8 @@ def predicate_eval_emoji_reaction(ctx: commands.Context, reaction: discord.React
 
 
 def main():
-    with open(CONFIG_PATH) as config_file:
+    """Run an instance of the bot with config loaded from the toml file."""
+    with open(CONFIG_PATH, encoding='utf_8') as config_file:
         config = toml.load(config_file)
 
     bot = SnakeboxedBot(command_prefix=config['settings']['command_prefixes'])
