@@ -18,9 +18,10 @@ from discord.ext import commands
 
 # todo: sublicense as gnu gplv3
 # todo: make class for config
+# todo: settings system for global hosting
 
 
-__version__ = '0.1.0'
+__version__ = '1.0.0'
 
 
 ESCAPE_REGEX = re.compile('[`\u202E\u200B]{3,}')
@@ -86,20 +87,16 @@ class SnakeboxedBot(commands.Bot):
         await self.http_session.close()
 
 
-class SnekboxCog(commands.Cog):
-    """Safe evaluation of Python code using Snekbox."""
-    qualified_name = 'Snekbox'
+class InviteCog(commands.Cog):
+    """Invite this bot to your server."""
+    qualified_name = 'Invite'
 
-    def __init__(self, bot: SnakeboxedBot, snekbox_port: int):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.jobs = {}
 
-        self.snekbox_port = snekbox_port
-        self.snekbox_url = SNEKBOX_URL.format(port=self.snekbox_port)
-
-    @commands.command(name='invite-bot', aliases=['bot-invite', 'invite'], hidden=True)
+    @commands.command(name='invite', aliases=['bot-invite', 'invite-bot'])
     async def invite_bot(self, ctx: commands.Context):
-        """Send a discord bot invite for this bot.
+        """Send a Discord bot invite for this bot.
 
         Uses the bot's current client id and some required permissions.
         """
@@ -111,6 +108,18 @@ class SnekboxCog(commands.Cog):
 
         invite_url = discord.utils.oauth_url(client_id, permissions, ctx.guild)
         await ctx.send(invite_url)
+
+
+class SnekboxCog(commands.Cog):
+    """Safe evaluation of Python code using Snekbox."""
+    qualified_name = 'Snekbox'
+
+    def __init__(self, bot: SnakeboxedBot, snekbox_port: int):
+        self.bot = bot
+        self.jobs = {}
+
+        self.snekbox_port = snekbox_port
+        self.snekbox_url = SNEKBOX_URL.format(port=self.snekbox_port)
 
     async def post_eval(self, code: str) -> dict:
         """Send a POST request to the Snekbox API to evaluate code and return the results."""
@@ -375,8 +384,12 @@ def main():
         config = toml.load(config_file)
 
     bot = SnakeboxedBot(command_prefix=config['settings']['command_prefixes'])
+
+    invite_cog = InviteCog(bot)
+    bot.add_cog(invite_cog)
     snekbox_cog = SnekboxCog(bot, snekbox_port=config['settings']['snekbox_port'])
     bot.add_cog(snekbox_cog)
+
     bot.run(config['auth']['token'])
 
 
