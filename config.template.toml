@@ -3,4 +3,5 @@ token = ""
 
 [settings]
 command_prefixes = ["?"]
+github_link = "https://github.com/JMcB17/snakeboxed"
 snekbox_port = 8060

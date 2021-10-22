@@ -24,7 +24,7 @@ from discord.ext import commands
 # todo: settings system for global hosting
 
 
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 
 ESCAPE_REGEX = re.compile('[`\u202E\u200B]{3,}')
@@ -95,15 +95,32 @@ class SnakeboxedBot(commands.Bot):
         await self.http_session.close()
 
 
-class InviteCog(commands.Cog):
-    """Invite this bot to your server."""
-    qualified_name = 'Invite'
+class InfoCog(commands.Cog):
+    """Get info about this bot."""
+    qualified_name = 'Info'
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot, github_link: str):
         self.bot = bot
+        self.github_link = github_link
+
+    @commands.command(name='github', aliases=['github-link', 'git', 'source'])
+    async def send_github_link(self, ctx: commands.Context):
+        """Send the GitHub link for this bot's source code."""
+        return await ctx.send(f'<{self.github_link}>')
+
+    @commands.command(name='prefix', aliases=['prefixes', 'bot-prefix', 'bot-prefixes'])
+    async def send_bot_prefixes(self, ctx: commands.Context):
+        """Send the command prefixes for this bot.
+
+        Command prefixes are separated by newlines.
+        """
+        prefixes_list = ctx.bot.command_prefix(ctx.bot, ctx.message)
+        prefixes_list_no_role = [p for p in prefixes_list if '<@!' not in p]
+        prefixes = '\n'.join(prefixes_list_no_role)
+        return await ctx.send(prefixes)
 
     @commands.command(name='invite', aliases=['bot-invite', 'invite-bot'])
-    async def invite_bot(self, ctx: commands.Context):
+    async def send_bot_invite(self, ctx: commands.Context):
         """Send a Discord bot invite for this bot.
 
         Uses the bot's current client id and some required permissions.
@@ -404,8 +421,8 @@ def main():
 
     snekbox_cog = SnekboxCog(bot, snekbox_port=config['settings']['snekbox_port'])
     bot.add_cog(snekbox_cog)
-    invite_cog = InviteCog(bot)
-    bot.add_cog(invite_cog)
+    info_cog = InfoCog(bot, github_link=config['settings']['github_link'])
+    bot.add_cog(info_cog)
 
     bot.run(config['auth']['token'])
 
