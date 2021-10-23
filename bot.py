@@ -5,8 +5,10 @@ import asyncio
 import contextlib
 import datetime
 import io
+import os
 import re
 import textwrap
+import sys
 import logging as log
 from functools import partial
 from pathlib import Path
@@ -22,9 +24,14 @@ from discord.ext import commands
 # todo: sublicense as gnu gplv3
 # todo: make class for config
 # todo: settings system for global hosting
+# todo: 'bug fix'
+# todo: python resources commands
+#       link to tutorial and stuff
+#       port docs lookup?
+# todo: credits command
 
 
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 
 
 ESCAPE_REGEX = re.compile('[`\u202E\u200B]{3,}')
@@ -62,7 +69,7 @@ MAX_DISCORD_FILE_LENGTH_BYTES = 8 * (10 ** 6)  # 8MB
 DISCORD_FILE_NAME = 'output.txt'
 
 
-stream_handler = log.StreamHandler()
+stream_handler = log.StreamHandler(stream=sys.stdout)
 file_handler = log.FileHandler(LOG_PATH, encoding='utf_8')
 log.basicConfig(
     level=log.INFO,
@@ -103,6 +110,13 @@ class InfoCog(commands.Cog):
     def __init__(self, bot: commands.Bot, github_link: str):
         self.bot = bot
         self.github_link = github_link
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def update(self, ctx: commands.Context):
+        """Send version number then git pull. pm2 should restart it from watching."""
+        await ctx.invoke(self.send_version_number)
+        os.system('git pull --ff-only')
 
     @commands.command(name='github', aliases=['github-link', 'git', 'source'])
     async def send_github_link(self, ctx: commands.Context):
