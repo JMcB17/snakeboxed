@@ -29,9 +29,11 @@ from discord.ext import commands
 #       link to tutorial and stuff
 #       port docs lookup?
 # todo: credits command
+# todo: allow .py text files as eval input
+# todo: lazy log formatting? ehhhh
 
 
-__version__ = '1.5.0'
+__version__ = '1.5.1'
 
 
 ESCAPE_REGEX = re.compile('[`\u202E\u200B]{3,}')
@@ -411,7 +413,9 @@ class SnekboxCog(commands.Cog):
             await ctx.send_help(ctx.command)
             return
 
-        log.info(f'Received code from {ctx.author} for evaluation:\n{code}')
+        log.info(
+            f'Received code from {ctx.author} ({ctx.author.id}) in {ctx.guild} ({ctx.guild.id}) for evaluation:\n{code}'
+        )
 
         while True:
             self.jobs[ctx.author.id] = datetime.datetime.now()
