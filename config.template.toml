@@ -3,6 +3,5 @@ token = ""
 
 [settings]
 command_prefixes = ["?"]
-github_link = "https://github.com/JMcB17/snakeboxed"
-creator_discord = "JMcB#7918"
+snekbox_url = "http://localhost"
 snekbox_port = 8060

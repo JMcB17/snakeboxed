@@ -31,7 +31,7 @@ from discord.ext import commands
 # todo: credits command
 
 
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 
 
 ESCAPE_REGEX = re.compile('[`\u202E\u200B]{3,}')
@@ -55,7 +55,8 @@ SIGKILL = 9
 REEVAL_EMOJI = '\U0001f501'  # :repeat:
 REEVAL_TIMEOUT = 30
 
-SNEKBOX_URL = 'http://localhost:{port}/eval'
+GITHUB_LINK = 'https://github.com/JMcB17/snakeboxed'
+CREATOR_DISCORD_NAME = 'JMcB#7918'
 CONFIG_PATH = Path('config.toml')
 LOG_PATH = Path('info.log')
 BOT_PERMISSIONS = {
@@ -107,9 +108,8 @@ class InfoCog(commands.Cog):
     """Get info about this bot."""
     qualified_name = 'Info'
 
-    def __init__(self, bot: commands.Bot, github_link: str):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.github_link = github_link
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -121,16 +121,16 @@ class InfoCog(commands.Cog):
     @commands.command(name='github', aliases=['github-link', 'git', 'source'])
     async def send_github_link(self, ctx: commands.Context):
         """Send the GitHub link for this bot's source code."""
-        return await ctx.send(f'<{self.github_link}>')
+        return await ctx.send(f'<{GITHUB_LINK}>')
 
     @commands.command(name='bugs', aliases=['bug', 'report-bug', 'report-bugs', 'bug-report'])
     async def send_bug_report_links(self, ctx: commands.Context):
         """Send info on reporting bugs."""
         bug_report_msg = (
             'Message me on Discord: \n'
-            'JMcB#7918\n '
+            f'{CREATOR_DISCORD_NAME}\n '
             'Open an issue on GitHub:\n '
-            f'<{self.github_link}/issues/new>'
+            f'<{GITHUB_LINK}/issues/new>'
         )
         return await ctx.send(bug_report_msg)
 
@@ -171,16 +171,17 @@ class SnekboxCog(commands.Cog):
 
     qualified_name = 'Snekbox'
 
-    def __init__(self, bot: SnakeboxedBot, snekbox_port: int):
+    def __init__(self, bot: SnakeboxedBot, snekbox_url: str, snekbox_port: int):
         self.bot = bot
         self.jobs = {}
 
+        self.snekbox_url = snekbox_url
         self.snekbox_port = snekbox_port
-        self.snekbox_url = SNEKBOX_URL.format(port=self.snekbox_port)
+        self.snekbox_eval_api_url = f'{self.snekbox_url}:{self.snekbox_port}/eval'
 
     async def post_eval(self, code: str) -> dict:
         """Send a POST request to the Snekbox API to evaluate code and return the results."""
-        url = self.snekbox_url
+        url = self.snekbox_eval_api_url
         data = {'input': code}
         async with self.bot.http_session.post(url, json=data, raise_for_status=True) as resp:
             return await resp.json()
@@ -450,9 +451,13 @@ def main():
         command_prefix=commands.when_mentioned_or(*config['settings']['command_prefixes'])
     )
 
-    snekbox_cog = SnekboxCog(bot, snekbox_port=config['settings']['snekbox_port'])
+    snekbox_cog = SnekboxCog(
+        bot,
+        snekbox_url=config['settings']['snekbox_url'],
+        snekbox_port=config['settings']['snekbox_port']
+    )
     bot.add_cog(snekbox_cog)
-    info_cog = InfoCog(bot, github_link=config['settings']['github_link'])
+    info_cog = InfoCog(bot)
     bot.add_cog(info_cog)
 
     bot.run(config['auth']['token'])
