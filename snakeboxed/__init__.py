@@ -61,23 +61,23 @@ def main():
     """Run an instance of the bot with config loaded from the toml file."""
     config = get_config()
 
-    bot = snakeboxed.bot.Snakeboxed(
+    snakeboxed_bot = snakeboxed.Snakeboxed(
         command_prefix=commands.when_mentioned_or(*config['settings']['command_prefixes'])
     )
 
     snekbox_cog = snakeboxed.cogs.Snekbox(
-        bot,
+        snakeboxed_bot,
         snekbox_url=config['settings']['snekbox_url'],
         snekbox_port=config['settings']['snekbox_port']
     )
-    bot.add_cog(snekbox_cog)
+    snakeboxed_bot.add_cog(snekbox_cog)
     info_cog = snakeboxed.cogs.SnakeboxedInfo(
-        bot,
+        snakeboxed_bot,
         pm2_name=config['settings']['pm2_name']
     )
-    bot.add_cog(info_cog)
+    snakeboxed_bot.add_cog(info_cog)
 
-    bot.run(config['auth']['token'])
+    snakeboxed_bot.run(config['auth']['token'])
 
 
 if __name__ == '__main__':

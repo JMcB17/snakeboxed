@@ -1,4 +1,5 @@
 import subprocess
+from typing import Optional
 
 import discord
 from discord.ext import commands
@@ -25,12 +26,19 @@ class SnakeboxedInfo(commands.Cog):
         self.bot = bot
         self.pm2_name = pm2_name
 
-    @commands.command(hidden=True)
+    # todo: move to alternate cog or bot class itself?
+    @commands.command(hidden=True, aliases=['u'])
     @commands.is_owner()
-    async def update(self, ctx: commands.Context, commit_id: str = ''):
-        """Send version number then git pull. pm2 should restart it from watching."""
+    async def update(self, ctx: commands.Context, commit_id: Optional[str]):
+        """Update the bot."""
         await ctx.invoke(self.send_version_number)
-        for command in f'pm2 pull {self.pm2_name} {commit_id}', f'pm2 restart {self.pm2_name}':
+
+        pull_command = ['pm2', 'pull', self.pm2_name]
+        if commit_id is not None:
+            pull_command.append(commit_id)
+        restart_command = ['pm2', 'restart', self.pm2_name]
+
+        for command in pull_command, restart_command:
             await ctx.send(f'```bash\n{command}\n```')
             # capture all output in command result stdout together
             command_result_bytes = subprocess.run(
