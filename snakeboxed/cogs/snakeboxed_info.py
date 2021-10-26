@@ -33,7 +33,9 @@ class SnakeboxedInfo(commands.Cog):
         for command in f'pm2 pull {self.pm2_name} {commit_id}', f'pm2 restart {self.pm2_name}':
             await ctx.send(command)
             # capture all output in command result stdout together
-            command_result_bytes = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            command_result_bytes = subprocess.run(
+                command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            )
             command_result = command_result_bytes.stdout.decode(encoding='utf_8')
             await ctx.send(command_result)
 
