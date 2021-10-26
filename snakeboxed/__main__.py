@@ -1,0 +1,2 @@
+import snakeboxed
+snakeboxed.main()

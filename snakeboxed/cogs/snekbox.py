@@ -12,8 +12,7 @@ from typing import Optional, Tuple
 import discord
 from discord.ext import commands
 
-
-from bot import SnakeboxedBot
+from snakeboxed.bot import Snakeboxed
 
 
 ESCAPE_REGEX = re.compile('[`\u202E\u200B]{3,}')
@@ -50,7 +49,7 @@ class Snekbox(commands.Cog):
 
     qualified_name = 'Snekbox'
 
-    def __init__(self, bot: SnakeboxedBot, snekbox_url: str, snekbox_port: int):
+    def __init__(self, bot: Snakeboxed, snekbox_url: str, snekbox_port: int):
         self.bot = bot
         self.jobs = {}
 

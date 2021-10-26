@@ -19,7 +19,7 @@ BOT_PERMISSIONS = {
 
 class SnakeboxedInfo(commands.Cog):
     """Get info about this bot."""
-    qualified_name = 'Info'
+    qualified_name = 'Snakeboxed Info'
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot

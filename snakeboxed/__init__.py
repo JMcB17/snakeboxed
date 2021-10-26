@@ -5,7 +5,6 @@ import sys
 import logging as log
 from pathlib import Path
 
-
 import toml
 from discord.ext import commands
 
