@@ -1,51 +1,19 @@
-"""Simple Discord bot for snekbox (sandboxed Python code execution), self-host or use a global instance."""
-
-
 import asyncio
 import contextlib
 import datetime
 import io
-import os
+import logging
 import re
 import textwrap
-import sys
-import logging as log
 from functools import partial
-from pathlib import Path
 from signal import Signals
 from typing import Optional, Tuple
 
-import aiohttp
 import discord
-import toml
 from discord.ext import commands
 
 
-# todo: sublicense as gnu gplv3
-# todo: make class for config
-# todo: settings system for global hosting
-#       where to allow/disallow eval: channel, user, role
-#       docs lookup sources
-# todo: 'bug fix'
-# todo: python resources commands
-#       link to tutorial and stuff
-#       port docs lookup
-#       stackoverflow error search
-# todo: exec as alias of eval
-# todo: credits command
-# todo: allow .py text files as eval input
-# todo: allow message links as eval input
-# todo: lazy log formatting? ehhhh
-# todo: create privileged eval command for owner only
-# todo: fix update command using pm2 pull
-# todo: docker image
-# todo: expand readme
-#       installation instructions
-#       usage instructions
-#       credits - as with any programming, most the work was done for me
-
-
-__version__ = '1.5.1'
+from bot import SnakeboxedBot
 
 
 ESCAPE_REGEX = re.compile('[`\u202E\u200B]{3,}')
@@ -69,118 +37,15 @@ SIGKILL = 9
 REEVAL_EMOJI = '\U0001f501'  # :repeat:
 REEVAL_TIMEOUT = 30
 
-GITHUB_LINK = 'https://github.com/JMcB17/snakeboxed'
-CREATOR_DISCORD_NAME = 'JMcB#7918'
-CONFIG_PATH = Path('config.toml')
-LOG_PATH = Path('info.log')
-BOT_PERMISSIONS = {
-    'read_messages': True,
-    'send_messages': True,
-    'add_reactions': True,
-    'attach_files': True,
-    'manage_messages': True,
-}
 MAX_DISCORD_FILE_LENGTH_BYTES = 8 * (10 ** 6)  # 8MB
 DISCORD_FILE_NAME = 'output.txt'
 
 
-stream_handler = log.StreamHandler(stream=sys.stdout)
-file_handler = log.FileHandler(LOG_PATH, encoding='utf_8')
-log.basicConfig(
-    level=log.INFO,
-    handlers=[
-        stream_handler,
-        file_handler,
-    ]
-)
+# todo: configure this
+log = logging.getLogger(__name__)
 
 
-class SnakeboxedBot(commands.Bot):
-    """Custom Bot class for the Snekbox cog.
-
-    Adds http_session as an attribute, which is an aiohttp.ClientSession requried by the Snekbox cog.
-    Also uses a help command with a custom no_category.
-    """
-
-    def __init__(self, *args, **kwargs):
-        # assigned in on_ready for async
-        self.http_session = None
-
-        kwargs.setdefault('help_command', commands.DefaultHelpCommand(no_category='Help'))
-        super().__init__(*args, **kwargs)
-
-    async def on_ready(self):
-        self.http_session = aiohttp.ClientSession()
-        log.info(f'ready as {self.user.name}')
-
-    async def close(self):
-        await super().close()
-        await self.http_session.close()
-
-
-class InfoCog(commands.Cog):
-    """Get info about this bot."""
-    qualified_name = 'Info'
-
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
-
-    @commands.command(hidden=True)
-    @commands.is_owner()
-    async def update(self, ctx: commands.Context):
-        """Send version number then git pull. pm2 should restart it from watching."""
-        await ctx.invoke(self.send_version_number)
-        os.system('git pull --ff-only')
-
-    @commands.command(name='github', aliases=['github-link', 'git', 'source'])
-    async def send_github_link(self, ctx: commands.Context):
-        """Send the GitHub link for this bot's source code."""
-        return await ctx.send(f'<{GITHUB_LINK}>')
-
-    @commands.command(name='bugs', aliases=['bug', 'report-bug', 'report-bugs', 'bug-report'])
-    async def send_bug_report_links(self, ctx: commands.Context):
-        """Send info on reporting bugs."""
-        bug_report_msg = (
-            'Message me on Discord: \n'
-            f'{CREATOR_DISCORD_NAME}\n '
-            'Open an issue on GitHub:\n '
-            f'<{GITHUB_LINK}/issues/new>'
-        )
-        return await ctx.send(bug_report_msg)
-
-    @commands.command(name='version', aliases=['V'])
-    async def send_version_number(self, ctx: commands.Context):
-        """Send the current version number for this bot."""
-        return await ctx.send(__version__)
-
-    @commands.command(name='prefix', aliases=['prefixes', 'bot-prefix', 'bot-prefixes'])
-    async def send_bot_prefixes(self, ctx: commands.Context):
-        """Send the command prefixes for this bot.
-
-        Command prefixes are separated by newlines.
-        """
-        prefixes_list = ctx.bot.command_prefix(ctx.bot, ctx.message)
-        prefixes_list_no_role = [p for p in prefixes_list if '<@!' not in p]
-        prefixes = '\n'.join(prefixes_list_no_role)
-        return await ctx.send(prefixes)
-
-    @commands.command(name='invite', aliases=['bot-invite', 'invite-bot'])
-    async def send_bot_invite(self, ctx: commands.Context):
-        """Send a Discord bot invite for this bot.
-
-        Uses the bot's current client id and some required permissions.
-        """
-        app_info = await self.bot.application_info()
-        client_id = app_info.id
-
-        permissions = discord.Permissions()
-        permissions.update(**BOT_PERMISSIONS)
-
-        invite_url = discord.utils.oauth_url(client_id, permissions, ctx.guild)
-        await ctx.send(invite_url)
-
-
-class SnekboxCog(commands.Cog):
+class Snekbox(commands.Cog):
     """Safe evaluation of Python code using Snekbox."""
 
     qualified_name = 'Snekbox'
@@ -451,33 +316,3 @@ def predicate_eval_message_edit(ctx: commands.Context, old_msg: discord.Message,
 def predicate_eval_emoji_reaction(ctx: commands.Context, reaction: discord.Reaction, user: discord.User) -> bool:
     """Return True if the reaction REEVAL_EMOJI was added by the context message author on this message."""
     return reaction.message.id == ctx.message.id and user.id == ctx.author.id and str(reaction) == REEVAL_EMOJI
-
-
-def get_config() -> dict:
-    with open(CONFIG_PATH, encoding='utf_8') as config_file:
-        config = toml.load(config_file)
-    return config
-
-
-def main():
-    """Run an instance of the bot with config loaded from the toml file."""
-    config = get_config()
-
-    bot = SnakeboxedBot(
-        command_prefix=commands.when_mentioned_or(*config['settings']['command_prefixes'])
-    )
-
-    snekbox_cog = SnekboxCog(
-        bot,
-        snekbox_url=config['settings']['snekbox_url'],
-        snekbox_port=config['settings']['snekbox_port']
-    )
-    bot.add_cog(snekbox_cog)
-    info_cog = InfoCog(bot)
-    bot.add_cog(info_cog)
-
-    bot.run(config['auth']['token'])
-
-
-if __name__ == '__main__':
-    main()
