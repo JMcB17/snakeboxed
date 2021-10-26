@@ -31,13 +31,13 @@ class SnakeboxedInfo(commands.Cog):
         """Send version number then git pull. pm2 should restart it from watching."""
         await ctx.invoke(self.send_version_number)
         for command in f'pm2 pull {self.pm2_name} {commit_id}', f'pm2 restart {self.pm2_name}':
-            await ctx.send(command)
+            await ctx.send(f'```bash\n{command}\n```')
             # capture all output in command result stdout together
             command_result_bytes = subprocess.run(
                 command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
             )
             command_result = command_result_bytes.stdout.decode(encoding='utf_8')
-            await ctx.send(command_result)
+            await ctx.send(f'```\n{command_result}\n```')
 
     @commands.command(name='github', aliases=['github-link', 'git', 'source'])
     async def send_github_link(self, ctx: commands.Context):
