@@ -21,13 +21,11 @@ from snakeboxed.bot import Snakeboxed
 #       link to tutorial and stuff
 #       port docs lookup
 #       stackoverflow error search
-# todo: exec as alias of eval
 # todo: credits command
 # todo: allow .py text files as eval input
 # todo: allow message links as eval input
 # todo: lazy log formatting? ehhhh
 # todo: create privileged eval command for owner only
-# todo: fix update command using pm2 pull
 # todo: docker image
 # todo: expand readme
 #       installation instructions
@@ -35,7 +33,7 @@ from snakeboxed.bot import Snakeboxed
 #       credits - as with any programming, most the work was done for me
 
 
-__version__ = '1.5.1'
+__version__ = '1.5.2'
 
 
 CONFIG_PATH = Path('config.toml')
@@ -73,7 +71,10 @@ def main():
         snekbox_port=config['settings']['snekbox_port']
     )
     bot.add_cog(snekbox_cog)
-    info_cog = snakeboxed.cogs.SnakeboxedInfo(bot)
+    info_cog = snakeboxed.cogs.SnakeboxedInfo(
+        bot,
+        pm2_name=config['settings']['pm2_name']
+    )
     bot.add_cog(info_cog)
 
     bot.run(config['auth']['token'])

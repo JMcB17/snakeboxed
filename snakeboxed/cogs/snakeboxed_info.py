@@ -1,4 +1,4 @@
-import os
+import subprocess
 
 import discord
 from discord.ext import commands
@@ -21,15 +21,21 @@ class SnakeboxedInfo(commands.Cog):
     """Get info about this bot."""
     qualified_name = 'Snakeboxed Info'
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot, pm2_name: str):
         self.bot = bot
+        self.pm2_name = pm2_name
 
     @commands.command(hidden=True)
     @commands.is_owner()
-    async def update(self, ctx: commands.Context):
+    async def update(self, ctx: commands.Context, commit_id: str = ''):
         """Send version number then git pull. pm2 should restart it from watching."""
         await ctx.invoke(self.send_version_number)
-        os.system('git pull --ff-only')
+        for command in f'pm2 pull {self.pm2_name} {commit_id}', f'pm2 restart {self.pm2_name}':
+            await ctx.send(command)
+            # capture all output in command result stdout together
+            command_result_bytes = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            command_result = command_result_bytes.stdout.decode(encoding='utf_8')
+            await ctx.send(command_result)
 
     @commands.command(name='github', aliases=['github-link', 'git', 'source'])
     async def send_github_link(self, ctx: commands.Context):
