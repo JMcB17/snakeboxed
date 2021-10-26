@@ -12,7 +12,6 @@ import snakeboxed.cogs
 from snakeboxed.bot import Snakeboxed
 
 
-# todo: sublicense as gnu gplv3
 # todo: make class for config
 # todo: settings system for global hosting
 #       where to allow/disallow eval: channel, user, role
