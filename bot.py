@@ -24,13 +24,25 @@ from discord.ext import commands
 # todo: sublicense as gnu gplv3
 # todo: make class for config
 # todo: settings system for global hosting
+#       where to allow/disallow eval: channel, user, role
+#       docs lookup sources
 # todo: 'bug fix'
 # todo: python resources commands
 #       link to tutorial and stuff
-#       port docs lookup?
+#       port docs lookup
+#       stackoverflow error search
+# todo: exec as alias of eval
 # todo: credits command
 # todo: allow .py text files as eval input
+# todo: allow message links as eval input
 # todo: lazy log formatting? ehhhh
+# todo: create privileged eval command for owner only
+# todo: fix update command using pm2 pull
+# todo: docker image
+# todo: expand readme
+#       installation instructions
+#       usage instructions
+#       credits - as with any programming, most the work was done for me
 
 
 __version__ = '1.5.1'
