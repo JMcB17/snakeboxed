@@ -2,7 +2,7 @@
 
 
 import sys
-import logging as log
+import logging
 from pathlib import Path
 
 import toml
@@ -33,6 +33,7 @@ from snakeboxed.bot import Snakeboxed
 #       credits - as with any programming, most the work was done for me
 # todo: setup.py
 # todo: list on discord bot websites
+# todo: switch to GNU/A GPL
 
 
 __version__ = '1.5.2'
@@ -42,15 +43,16 @@ CONFIG_PATH = Path('config.toml')
 LOG_PATH = Path('info.log')
 
 
-stream_handler = log.StreamHandler(stream=sys.stdout)
-file_handler = log.FileHandler(LOG_PATH, encoding='utf_8')
-log.basicConfig(
-    level=log.INFO,
+stream_handler = logging.StreamHandler(stream=sys.stdout)
+file_handler = logging.FileHandler(LOG_PATH, encoding='utf_8')
+logging.basicConfig(
+    level=logging.INFO,
     handlers=[
         stream_handler,
         file_handler,
     ]
 )
+log = logging.getLogger(__name__)
 
 
 def get_config() -> dict:

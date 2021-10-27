@@ -27,5 +27,5 @@ class Snakeboxed(commands.Bot):
 
     async def close(self):
         await super().close()
-        await self.http_session.close()
-
+        if self.http_session is not None:
+            await self.http_session.close()
