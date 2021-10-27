@@ -31,6 +31,8 @@ from snakeboxed.bot import Snakeboxed
 #       installation instructions
 #       usage instructions
 #       credits - as with any programming, most the work was done for me
+# todo: setup.py
+# todo: list on discord bot websites
 
 
 __version__ = '1.5.2'
@@ -72,10 +74,14 @@ def main():
     )
     snakeboxed_bot.add_cog(snekbox_cog)
     info_cog = snakeboxed.cogs.SnakeboxedInfo(
+        snakeboxed_bot
+    )
+    snakeboxed_bot.add_cog(info_cog)
+    owner_cog = snakeboxed.cogs.Owner(
         snakeboxed_bot,
         pm2_name=config['settings']['pm2_name']
     )
-    snakeboxed_bot.add_cog(info_cog)
+    snakeboxed_bot.add_cog(owner_cog)
 
     snakeboxed_bot.run(config['auth']['token'])
 

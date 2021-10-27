@@ -4,7 +4,6 @@ import aiohttp
 from discord.ext import commands
 
 
-# todo: configure
 log = logging.getLogger(__name__)
 
 

@@ -40,7 +40,6 @@ MAX_DISCORD_FILE_LENGTH_BYTES = 8 * (10 ** 6)  # 8MB
 DISCORD_FILE_NAME = 'output.txt'
 
 
-# todo: configure this
 log = logging.getLogger(__name__)
 
 
