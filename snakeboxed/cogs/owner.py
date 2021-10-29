@@ -17,17 +17,15 @@ class Owner(commands.Cog):
         """Update the bot."""
         await ctx.send(snakeboxed.__version__)
 
-        pull_command = ['pm2', 'pull', self.pm2_name]
+        pull_command_list = ['pm2', 'pull', self.pm2_name]
         if commit_id is not None:
-            pull_command.append(commit_id)
-        restart_command = ['pm2', 'restart', self.pm2_name]
+            pull_command_list.append(commit_id)
 
-        for command_list in pull_command, restart_command:
-            command = ' '.join(command_list)
-            await ctx.send(f'```bash\n{command}\n```')
-            # capture all output in command result stdout together
-            command_result_bytes = subprocess.run(
-                command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-            )
-            command_result = command_result_bytes.stdout.decode(encoding='utf_8')
-            await ctx.send(f'```\n{command_result}\n```')
+        pull_command = ' '.join(pull_command_list)
+        await ctx.send(f'```bash\n{pull_command}\n```')
+        # capture all output in command result stdout together
+        command_result_bytes = subprocess.run(
+            pull_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        )
+        command_result = command_result_bytes.stdout.decode(encoding='utf_8')
+        await ctx.send(f'```\n{command_result}\n```')

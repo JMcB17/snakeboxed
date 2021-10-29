@@ -36,7 +36,7 @@ from snakeboxed.bot import Snakeboxed
 # todo: `@Snakeboxed has` command
 
 
-__version__ = '1.5.2'
+__version__ = '1.5.3'
 
 
 CONFIG_PATH = Path('config.toml')
