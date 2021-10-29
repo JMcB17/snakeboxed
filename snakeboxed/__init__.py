@@ -31,9 +31,11 @@ from snakeboxed.bot import Snakeboxed
 #       installation instructions
 #       usage instructions
 #       credits - as with any programming, most the work was done for me
+#       centre image https://gist.github.com/DavidWells/7d2e0e1bc78f4ac59a123ddf8b74932d
 # todo: setup.py
 # todo: list on discord bot websites
 # todo: switch to GNU/A GPL
+# todo: `@Snakeboxed has` command
 
 
 __version__ = '1.5.2'
