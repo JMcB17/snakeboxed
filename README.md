@@ -5,7 +5,9 @@ Work in progress
 
 https://discord.com/oauth2/authorize?client_id=900808633472933978&scope=bot&permissions=44096
 
-![Snakeboxed logo - the Python Discord logo hovering out of a clipart cardboard box](https://github.com/JMcB17/snakeboxed/blob/main/assets/logo-128.png)
+<p align="center">
+    <img alt="Snakeboxed logo, the Python Discord logo hovering out of a clipart cardboard box." src="https://github.com/JMcB17/snakeboxed/blob/main/assets/logo-128.png">
+</p>
 
 Requires a snekbox server to self-host. Snekbox uses docker.
 
