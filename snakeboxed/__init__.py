@@ -18,7 +18,6 @@ from snakeboxed.bot import Snakeboxed
 #       docs lookup sources
 # todo: 'bug fix'
 # todo: python resources commands
-#       link to tutorial and stuff
 #       port docs lookup
 #       stackoverflow error search
 # todo: credits command
@@ -36,7 +35,7 @@ from snakeboxed.bot import Snakeboxed
 # todo: `@Snakeboxed has` command
 
 
-__version__ = '1.5.3'
+__version__ = '1.6.0'
 
 
 CONFIG_PATH = Path('config.toml')
@@ -69,21 +68,26 @@ def main():
         command_prefix=commands.when_mentioned_or(*config['settings']['command_prefixes'])
     )
 
+    # add all relevant cogs
+    owner_cog = snakeboxed.cogs.Owner(
+        snakeboxed_bot,
+        pm2_name=config['settings']['pm2_name']
+    )
+    snakeboxed_bot.add_cog(owner_cog)
+    python_info_cog = snakeboxed.cogs.PythonInfo(
+        snakeboxed_bot
+    )
+    snakeboxed_bot.add_cog(python_info_cog)
+    snakeboxed_info_cog = snakeboxed.cogs.SnakeboxedInfo(
+        snakeboxed_bot
+    )
+    snakeboxed_bot.add_cog(snakeboxed_info_cog)
     snekbox_cog = snakeboxed.cogs.Snekbox(
         snakeboxed_bot,
         snekbox_url=config['settings']['snekbox_url'],
         snekbox_port=config['settings']['snekbox_port']
     )
     snakeboxed_bot.add_cog(snekbox_cog)
-    info_cog = snakeboxed.cogs.SnakeboxedInfo(
-        snakeboxed_bot
-    )
-    snakeboxed_bot.add_cog(info_cog)
-    owner_cog = snakeboxed.cogs.Owner(
-        snakeboxed_bot,
-        pm2_name=config['settings']['pm2_name']
-    )
-    snakeboxed_bot.add_cog(owner_cog)
 
     snakeboxed_bot.run(config['auth']['token'])
 

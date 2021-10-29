@@ -11,8 +11,12 @@ class Owner(commands.Cog):
         self.bot = bot
         self.pm2_name = pm2_name
 
+    async def cog_check(self, ctx: commands.Context) -> bool:
+        if not await ctx.bot.is_owner(ctx.author):
+            raise commands.NotOwner('You do not own this bot.')
+        return True
+
     @commands.command(hidden=True, aliases=['u'])
-    @commands.is_owner()
     async def update(self, ctx: commands.Context, commit_id: Optional[str]):
         """Update the bot."""
         await ctx.send(snakeboxed.__version__)
