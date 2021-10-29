@@ -16,7 +16,6 @@ from snakeboxed.bot import Snakeboxed
 # todo: settings system for global hosting
 #       where to allow/disallow eval: channel, user, role
 #       docs lookup sources
-# todo: 'bug fix'
 # todo: python resources commands
 #       port docs lookup
 #       stackoverflow error search
@@ -35,7 +34,7 @@ from snakeboxed.bot import Snakeboxed
 # todo: `@Snakeboxed has` command
 
 
-__version__ = '1.6.0'
+__version__ = '1.6.1'
 
 
 CONFIG_PATH = Path('config.toml')

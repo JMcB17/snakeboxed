@@ -1,4 +1,3 @@
-from typing import Optional
 from discord.ext import commands
 
 
@@ -17,6 +16,7 @@ https://www.pythondiscord.com/resources/
 
 
 class PythonInfo(commands.Cog):
+    """Information about the Python programming language like resources and docs lookup."""
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -24,4 +24,5 @@ class PythonInfo(commands.Cog):
 
     @commands.command(name='resources', aliases=['python-resources', 'pr', 'r'])
     async def python_resources(self, ctx: commands.Context):
+        """Send some links to Python tutorials, documentation etc."""
         return await ctx.send(PYTHON_RESOURCES_HELP)

@@ -16,7 +16,7 @@ BOT_PERMISSIONS = {
 
 
 class SnakeboxedInfo(commands.Cog):
-    """Get info about this bot."""
+    """Information about Snakeboxed bot."""
     qualified_name = 'Snakeboxed Info'
 
     def __init__(self, bot: commands.Bot):
@@ -42,6 +42,27 @@ class SnakeboxedInfo(commands.Cog):
     async def send_version_number(self, ctx: commands.Context):
         """Send the current version number for this bot."""
         return await ctx.send(snakeboxed.__version__)
+
+    @commands.command(hidden=True)
+    async def coolsville(self, ctx: commands.Context):
+        """I think Coolsville sucks!
+
+        No! Hey! You're doing that thing again where you take everything I say out of context!
+        You're trying to make it look like I think Coolsville sucks! No! Don't record that!
+        """
+        return await ctx.send('You think Coolsville sucks?', file=discord.File('assets/secret/coolsville.png'))
+
+    @commands.command(name='poggers', aliases=['lilianpoggers', 'lilianpog' 'lp'], hidden=True)
+    async def lilian_poggers(self, ctx: commands.Context, f: str = 'ogg'):
+        """???"""
+        poggers = ['ogg', 'flac', 'mp4']
+
+        # ppl might use .mp4 for example
+        f = f.strip('.')
+
+        if f in poggers:
+            fp = f'assets/secret/lilian_poggers.{f}'
+            return await ctx.send(file=discord.File(fp))
 
     @commands.command(name='prefix', aliases=['prefixes', 'bot-prefix', 'bot-prefixes'])
     async def send_bot_prefixes(self, ctx: commands.Context):
