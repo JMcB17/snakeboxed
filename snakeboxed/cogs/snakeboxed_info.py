@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import discord
 from discord.ext import commands
 
@@ -52,16 +54,15 @@ class SnakeboxedInfo(commands.Cog):
         """
         return await ctx.send('You think Coolsville sucks?', file=discord.File('assets/secret/coolsville.png'))
 
-    @commands.command(name='poggers', aliases=['lilianpoggers', 'lilianpog' 'lp'], hidden=True)
+    @commands.command(name='poggers', aliases=['pog', 'lilianpoggers', 'lilianpog' 'lp'], hidden=True)
     async def lilian_poggers(self, ctx: commands.Context, f: str = 'ogg'):
         """???"""
-        poggers = ['ogg', 'flac', 'mp4']
-
+        fp_no_suffix = Path('assets/secret/lilian_poggers')
         # ppl might use .mp4 for example
         f = f.strip('.')
+        fp = fp_no_suffix.with_suffix(f'.{f}')
 
-        if f in poggers:
-            fp = f'assets/secret/lilian_poggers.{f}'
+        if fp.is_file():
             return await ctx.send(file=discord.File(fp))
 
     @commands.command(name='prefix', aliases=['prefixes', 'bot-prefix', 'bot-prefixes'])

@@ -1,3 +1,4 @@
+import json
 import subprocess
 from typing import Optional
 
@@ -20,6 +21,15 @@ class Owner(commands.Cog):
     async def update(self, ctx: commands.Context, commit_id: Optional[str]):
         """Update the bot."""
         await ctx.send(snakeboxed.__version__)
+
+        with open(snakeboxed.bot.UPDATE_FILE_PATH, 'w') as update_file:
+            json.dump(
+                {
+                    'guild': ctx.guild.id,
+                    'channel': ctx.channel.id,
+                },
+                update_file
+            )
 
         pull_command_list = ['pm2', 'pull', self.pm2_name]
         if commit_id is not None:

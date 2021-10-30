@@ -1,6 +1,7 @@
 *.db
 *.toml
 !*.template.toml
+update.json
 
 # large file
 *.psd
