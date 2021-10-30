@@ -28,7 +28,7 @@ from snakeboxed.bot import Snakeboxed
 # todo: list on discord bot websites
 
 
-__version__ = '1.6.3'
+__version__ = '1.6.4'
 
 
 CONFIG_PATH = Path('config.toml')

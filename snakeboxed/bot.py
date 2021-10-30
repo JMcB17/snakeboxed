@@ -34,6 +34,7 @@ class Snakeboxed(commands.Bot):
             return
         with open(UPDATE_FILE_PATH) as update_file:
             update_location_ids = json.load(update_file)
+        UPDATE_FILE_PATH.unlink()
 
         update_guild: discord.Guild = self.get_guild(update_location_ids['guild'])
         if update_guild is None:
@@ -49,6 +50,7 @@ class Snakeboxed(commands.Bot):
 
     async def on_ready(self):
         self.http_session = aiohttp.ClientSession()
+        await self.post_update()
         log.info(f'ready as {self.user.name}')
 
     async def close(self):
