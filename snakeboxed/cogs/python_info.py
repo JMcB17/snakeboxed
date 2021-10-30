@@ -1,7 +1,12 @@
 import asyncio
+import collections
+import contextlib
 import logging
-from typing import NamedTuple
+import sys
+import textwrap
+from typing import NamedTuple, Optional
 
+import aiohttp
 import discord
 from discord.ext import commands
 
@@ -38,25 +43,25 @@ class PythonInfo(commands.Cog):
 
 # symbols with a group contained here will get the group prefixed on duplicates
 FORCE_PREFIX_GROUPS = (
-    "term",
-    "label",
-    "token",
-    "doc",
-    "pdbcommand",
-    "2to3fixer",
+    'term',
+    'label',
+    'token',
+    'doc',
+    'pdbcommand',
+    '2to3fixer',
 )
 NOT_FOUND_DELETE_DELAY = RedirectOutput.delete_delay
 # Delay to wait before trying to reach a rescheduled inventory again, in minutes
 FETCH_RESCHEDULE_DELAY = SimpleNamespace(first=2, repeated=5)
 
-COMMAND_LOCK_SINGLETON = "inventory refresh"
+COMMAND_LOCK_SINGLETON = 'inventory refresh'
 
 
 class DocItem(NamedTuple):
     """Holds inventory symbol information."""
 
     package: str  # Name of the package name the symbol is from
-    group: str  # Interpshinx "role" of the symbol, for example `label` or `method`
+    group: str  # Intersphinx "role" of the symbol, for example `label` or `method`
     base_url: str  # Absolute path to to which the relative path resolves, same for all items with the same package
     relative_url_path: str  # Relative path to the page where the symbol is located
     symbol_id: str  # Fragment id used to locate the symbol on the page
@@ -78,7 +83,7 @@ class DocCog(commands.Cog):
         self.doc_symbols: dict[str, DocItem] = {}  # Maps symbol names to objects containing their metadata.
         self.item_fetcher = _batch_parser.BatchParser()
         # Maps a conflicting symbol name to a list of the new, disambiguated names created from conflicts with the name.
-        self.renamed_symbols = defaultdict(list)
+        self.renamed_symbols = collections.defaultdict(list)
 
         self.inventory_scheduler = Scheduler(self.__class__.__name__)
 
@@ -88,7 +93,7 @@ class DocCog(commands.Cog):
 
         self.init_refresh_task = scheduling.create_task(
             self.init_refresh_inventory(),
-            name="Doc inventory init",
+            name='Doc inventory init',
             event_loop=self.bot.loop,
         )
 
@@ -113,14 +118,14 @@ class DocCog(commands.Cog):
             for symbol_name, relative_doc_url in items:
 
                 # e.g. get 'class' from 'py:class'
-                group_name = group.split(":")[1]
+                group_name = group.split(':')[1]
                 symbol_name = self.ensure_unique_symbol_name(
                     package_name,
                     group_name,
                     symbol_name,
                 )
 
-                relative_url_path, _, symbol_id = relative_doc_url.partition("#")
+                relative_url_path, _, symbol_id = relative_doc_url.partition('#')
                 # Intern fields that have shared content so we're not storing unique strings for every object
                 doc_item = DocItem(
                     package_name,
@@ -132,7 +137,7 @@ class DocCog(commands.Cog):
                 self.doc_symbols[symbol_name] = doc_item
                 self.item_fetcher.add_item(doc_item)
 
-        log.info(f"Fetched inventory for {package_name}.")
+        log.info(f'Fetched inventory for {package_name}.')
 
     async def update_or_reschedule_inventory(
         self,
@@ -149,7 +154,7 @@ class DocCog(commands.Cog):
             package = await fetch_inventory(inventory_url)
         except InvalidHeaderError as e:
             # Do not reschedule if the header is invalid, as the request went through but the contents are invalid.
-            log.warning(f"Invalid inventory header at {inventory_url}. Reason: {e}")
+            log.warning(f'Invalid inventory header at {inventory_url}. Reason: {e}')
             return
 
         if not package:
@@ -158,7 +163,7 @@ class DocCog(commands.Cog):
                 delay = FETCH_RESCHEDULE_DELAY.repeated
             else:
                 delay = FETCH_RESCHEDULE_DELAY.first
-            log.info(f"Failed to fetch inventory; attempting again in {delay} minutes.")
+            log.info(f'Failed to fetch inventory; attempting again in {delay} minutes.')
             self.inventory_scheduler.schedule_later(
                 delay*60,
                 api_package_name,
@@ -180,13 +185,13 @@ class DocCog(commands.Cog):
             return symbol_name  # There's no conflict so it's fine to simply use the given symbol name.
 
         def rename(prefix: str, *, rename_extant: bool = False) -> str:
-            new_name = f"{prefix}.{symbol_name}"
+            new_name = f'{prefix}.{symbol_name}'
             if new_name in self.doc_symbols:
                 # If there's still a conflict, qualify the name further.
                 if rename_extant:
-                    new_name = f"{item.package}.{item.group}.{symbol_name}"
+                    new_name = f'{item.package}.{item.group}.{symbol_name}'
                 else:
-                    new_name = f"{package_name}.{group_name}.{symbol_name}"
+                    new_name = f'{package_name}.{group_name}.{symbol_name}'
 
             self.renamed_symbols[symbol_name].append(new_name)
 
@@ -222,7 +227,7 @@ class DocCog(commands.Cog):
         """Refresh internal documentation inventories."""
         self.refresh_event.clear()
         await self.symbol_get_event.wait()
-        log.debug("Refreshing documentation inventory...")
+        log.debug('Refreshing documentation inventory...')
         self.inventory_scheduler.cancel_all()
 
         self.base_urls.clear()
@@ -232,22 +237,22 @@ class DocCog(commands.Cog):
 
         coros = [
             self.update_or_reschedule_inventory(
-                package["package"], package["base_url"], package["inventory_url"]
-            ) for package in await self.bot.api_client.get("bot/documentation-links")
+                package['package'], package['base_url'], package['inventory_url']
+            ) for package in await self.bot.api_client.get('bot/documentation-links')
         ]
         await asyncio.gather(*coros)
-        log.debug("Finished inventory refresh.")
+        log.debug('Finished inventory refresh.')
         self.refresh_event.set()
 
-    def get_symbol_item(self, symbol_name: str) -> Tuple[str, Optional[DocItem]]:
+    def get_symbol_item(self, symbol_name: str) -> tuple[str, Optional[DocItem]]:
         """
         Get the `DocItem` and the symbol name used to fetch it from the `doc_symbols` dict.
         If the doc item is not found directly from the passed in name and the name contains a space,
         the first word of the name will be attempted to be used to get the item.
         """
         doc_item = self.doc_symbols.get(symbol_name)
-        if doc_item is None and " " in symbol_name:
-            symbol_name = symbol_name.split(" ", maxsplit=1)[0]
+        if doc_item is None and ' ' in symbol_name:
+            symbol_name = symbol_name.split(' ', maxsplit=1)[0]
             doc_item = self.doc_symbols.get(symbol_name)
 
         return symbol_name, doc_item
@@ -261,20 +266,20 @@ class DocCog(commands.Cog):
         markdown = await doc_cache.get(doc_item)
 
         if markdown is None:
-            log.debug(f"Redis cache miss with {doc_item}.")
+            log.debug(f'Redis cache miss with {doc_item}.')
             try:
                 markdown = await self.item_fetcher.get_markdown(doc_item)
 
             except aiohttp.ClientError as e:
-                log.warning(f"A network error has occurred when requesting parsing of {doc_item}.", exc_info=e)
-                return "Unable to parse the requested symbol due to a network error."
+                log.warning(f'A network error has occurred when requesting parsing of {doc_item}.', exc_info=e)
+                return 'Unable to parse the requested symbol due to a network error.'
 
             except Exception:
-                log.exception(f"An unexpected error has occurred when requesting parsing of {doc_item}.")
-                return "Unable to parse the requested symbol due to an error."
+                log.exception(f'An unexpected error has occurred when requesting parsing of {doc_item}.')
+                return 'Unable to parse the requested symbol due to an error.'
 
             if markdown is None:
-                return "Unable to parse the requested symbol."
+                return 'Unable to parse the requested symbol.'
         return markdown
 
     async def create_symbol_embed(self, symbol_name: str) -> Optional[discord.Embed]:
@@ -283,41 +288,39 @@ class DocCog(commands.Cog):
         If the symbol is known, an Embed with documentation about it is returned.
         First check the DocRedisCache before querying the cog's `BatchParser`.
         """
-        log.info(f"Building embed for symbol `{symbol_name}`")
+        log.info(f'Building embed for symbol `{symbol_name}`')
         if not self.refresh_event.is_set():
-            log.debug("Waiting for inventories to be refreshed before processing item.")
+            log.debug('Waiting for inventories to be refreshed before processing item.')
             await self.refresh_event.wait()
         # Ensure a refresh can't run in case of a context switch until the with block is exited
         with self.symbol_get_event:
             symbol_name, doc_item = self.get_symbol_item(symbol_name)
             if doc_item is None:
-                log.debug("Symbol does not exist.")
+                log.debug('Symbol does not exist.')
                 return None
-
-            self.bot.stats.incr(f"doc_fetches.{doc_item.package}")
 
             # Show all symbols with the same name that were renamed in the footer,
             # with a max of 200 chars.
             if symbol_name in self.renamed_symbols:
-                renamed_symbols = ", ".join(self.renamed_symbols[symbol_name])
-                footer_text = textwrap.shorten("Similar names: " + renamed_symbols, 200, placeholder=" ...")
+                renamed_symbols = ', '.join(self.renamed_symbols[symbol_name])
+                footer_text = textwrap.shorten('Similar names: ' + renamed_symbols, 200, placeholder=' ...')
             else:
                 footer_text = ""
 
             embed = discord.Embed(
                 title=discord.utils.escape_markdown(symbol_name),
-                url=f"{doc_item.url}#{doc_item.symbol_id}",
+                url=f'{doc_item.url}#{doc_item.symbol_id}',
                 description=await self.get_symbol_markdown(doc_item)
             )
             embed.set_footer(text=footer_text)
             return embed
 
-    @commands.group(name="docs", aliases=("doc", "d"), invoke_without_command=True)
+    @commands.group(name='docs', aliases=('doc', 'd'), invoke_without_command=True)
     async def docs_group(self, ctx: commands.Context, *, symbol_name: Optional[str]) -> None:
         """Look up documentation for Python symbols."""
         await self.get_command(ctx, symbol_name=symbol_name)
 
-    @docs_group.command(name="getdoc", aliases=("g",))
+    @docs_group.command(name='getdoc', aliases=('g',))
     async def get_command(self, ctx: commands.Context, *, symbol_name: Optional[str]) -> None:
         """
         Return a documentation embed for a given symbol.
@@ -330,11 +333,11 @@ class DocCog(commands.Cog):
         """
         if not symbol_name:
             inventory_embed = discord.Embed(
-                title=f"All inventories (`{len(self.base_urls)}` total)",
+                title=f'All inventories (`{len(self.base_urls)}` total)',
                 colour=discord.Colour.blue()
             )
 
-            lines = sorted(f"• [`{name}`]({url})" for name, url in self.base_urls.items())
+            lines = sorted(f'• [`{name}`]({url})' for name, url in self.base_urls.items())
             if self.base_urls:
                 await LinePaginator.paginate(lines, ctx, inventory_embed, max_size=400, empty=False)
 
@@ -343,17 +346,17 @@ class DocCog(commands.Cog):
                 await ctx.send(embed=inventory_embed)
 
         else:
-            symbol = symbol_name.strip("`")
+            symbol = symbol_name.strip('`')
             async with ctx.typing():
                 doc_embed = await self.create_symbol_embed(symbol)
 
             if doc_embed is None:
-                error_message = await send_denial(ctx, "No documentation found for the requested symbol.")
+                error_message = await send_denial(ctx, 'No documentation found for the requested symbol.')
                 await wait_for_deletion(error_message, (ctx.author.id,), timeout=NOT_FOUND_DELETE_DELAY)
 
                 # Make sure that we won't cause a ghost-ping by deleting the message
                 if not (ctx.message.mentions or ctx.message.role_mentions):
-                    with suppress(discord.NotFound):
+                    with contextlib.suppress(discord.NotFound):
                         await ctx.message.delete()
                         await error_message.delete()
 
@@ -364,4 +367,4 @@ class DocCog(commands.Cog):
     @staticmethod
     def base_url_from_inventory_url(inventory_url: str) -> str:
         """Get a base url from the url to an objects inventory by removing the last path segment."""
-        return inventory_url.removesuffix("/").rsplit("/", maxsplit=1)[0] + "/"
+        return inventory_url.removesuffix('/').rsplit('/', maxsplit=1)[0] + '/'
