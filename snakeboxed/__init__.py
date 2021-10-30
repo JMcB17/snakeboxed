@@ -25,14 +25,9 @@ from snakeboxed.bot import Snakeboxed
 # todo: lazy log formatting? ehhhh
 # todo: create privileged eval command for owner only
 # todo: docker image
-# todo: expand readme
-#       installation instructions
-#       usage instructions
-#       credits - as with any programming, most the work was done for me
 # todo: setup.py
 # todo: list on discord bot websites
 # todo: `@Snakeboxed has` command
-# todo: send version number after update
 
 
 __version__ = '1.6.2'
