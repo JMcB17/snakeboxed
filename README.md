@@ -2,7 +2,7 @@
 The public bot for learning Python together on Discord.
 
 <p align="center">
-    <img alt="Snakeboxed logo, the Python Discord logo hovering out of a clipart cardboard box." src="https://github.com/JMcB17/snakeboxed/blob/main/assets/logo-128.png">
+    <img alt="Snakeboxed logo, the Python Discord logo hovering out of a clipart cardboard box." src="https://github.com/JMcB17/snakeboxed/blob/main/assets/logo-256.png">
 </p>
 
 ## Features

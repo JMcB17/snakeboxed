@@ -19,7 +19,6 @@ from snakeboxed.bot import Snakeboxed
 # todo: python resources commands
 #       port docs lookup
 #       stackoverflow error search
-# todo: credits command
 # todo: allow .py text files as eval input
 # todo: allow message links as eval input
 # todo: lazy log formatting? ehhhh
@@ -27,10 +26,9 @@ from snakeboxed.bot import Snakeboxed
 # todo: docker image
 # todo: setup.py
 # todo: list on discord bot websites
-# todo: `@Snakeboxed has` command
 
 
-__version__ = '1.6.2'
+__version__ = '1.6.3'
 
 
 CONFIG_PATH = Path('config.toml')
