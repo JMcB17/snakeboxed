@@ -26,6 +26,7 @@ from snakeboxed.bot import Snakeboxed
 # todo: docker image
 # todo: setup.py
 # todo: list on discord bot websites
+# todo: slightly change logo, write script to render it
 
 
 __version__ = '1.6.4'
