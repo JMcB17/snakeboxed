@@ -32,10 +32,9 @@ from snakeboxed.bot import Snakeboxed
 # todo: setup.py
 # todo: list on discord bot websites
 # todo: `@Snakeboxed has` command
-# todo: send version number after update
 
 
-__version__ = '1.6.2'
+__version__ = '1.7.0'
 
 
 CONFIG_PATH = Path('config.toml')
