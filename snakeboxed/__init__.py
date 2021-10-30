@@ -19,19 +19,13 @@ from snakeboxed.bot import Snakeboxed
 # todo: python resources commands
 #       port docs lookup
 #       stackoverflow error search
-# todo: credits command
 # todo: allow .py text files as eval input
 # todo: allow message links as eval input
 # todo: lazy log formatting? ehhhh
 # todo: create privileged eval command for owner only
 # todo: docker image
-# todo: expand readme
-#       installation instructions
-#       usage instructions
-#       credits - as with any programming, most the work was done for me
 # todo: setup.py
 # todo: list on discord bot websites
-# todo: `@Snakeboxed has` command
 
 
 __version__ = '1.7.0'

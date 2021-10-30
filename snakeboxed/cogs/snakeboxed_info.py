@@ -15,6 +15,16 @@ BOT_PERMISSIONS = {
     'attach_files': True,
     'manage_messages': True,
 }
+CREDITS = """\
+As with any programming, most of the work was done for me.
+
+Snekbox:
+<https://github.com/python-discord/snekbox>
+Code taken from python-discord/bot under the \
+[Expat License/MIT License](https://github.com/JMcB17/snakeboxed/blob/main/LICENSE-THIRD-PARTY):
+<https://github.com/python-discord/bot>
+<https://github.com/python-discord/bot/blob/main/bot/exts/utils/snekbox.py>
+"""
 
 
 class SnakeboxedInfo(commands.Cog):
@@ -45,6 +55,12 @@ class SnakeboxedInfo(commands.Cog):
         """Send the current version number for this bot."""
         return await ctx.send(snakeboxed.__version__)
 
+    @commands.command()
+    async def credits(self, ctx: commands.Context):
+        """Send credits for this bot."""
+        embed = discord.Embed(description=CREDITS)
+        return await ctx.send(embed=embed)
+
     @commands.command(hidden=True)
     async def coolsville(self, ctx: commands.Context):
         """I think Coolsville sucks!
@@ -64,6 +80,14 @@ class SnakeboxedInfo(commands.Cog):
 
         if fp.is_file():
             return await ctx.send(file=discord.File(fp))
+
+    @commands.command(hidden=True)
+    async def has(self, ctx: commands.Context):
+        """what"""
+        if await ctx.bot.is_owner(ctx.author):
+            return await ctx.send('yeah I do lol')
+        else:
+            return await ctx.send('what')
 
     @commands.command(name='prefix', aliases=['prefixes', 'bot-prefix', 'bot-prefixes'])
     async def send_bot_prefixes(self, ctx: commands.Context):
