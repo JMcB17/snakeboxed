@@ -19,14 +19,13 @@ from snakeboxed.bot import Snakeboxed
 # todo: python resources commands
 #       port docs lookup
 #       stackoverflow error search
-# todo: allow .py text files as eval input
 # todo: allow message links as eval input
 # todo: create privileged eval command for owner only
 # todo: docker image
 # todo: setup.py
 
 
-__version__ = '1.6.6'
+__version__ = '1.7.0'
 
 
 CONFIG_PATH = Path('config.toml')
