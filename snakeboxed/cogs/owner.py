@@ -23,7 +23,7 @@ class Owner(commands.Cog):
         return True
 
     @commands.Cog.listener()
-    async def on_read(self):
+    async def on_ready(self):
         await self.post_update()
 
     @commands.command(hidden=True, aliases=['u'])
