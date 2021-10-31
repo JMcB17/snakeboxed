@@ -45,7 +45,7 @@ class Owner(commands.Cog):
         if commit_id is not None:
             pull_command.append(commit_id)
 
-        await ctx.send(f'```bash\n{pull_command}\n```')
+        await ctx.send(f"```bash\n{' '.join(pull_command)}\n```")
         # capture all output in command result stdout together
         command_result_bytes = subprocess.run(
             pull_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
