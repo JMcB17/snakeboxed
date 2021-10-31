@@ -61,7 +61,8 @@ def main():
     # add all relevant cogs
     owner_cog = snakeboxed.cogs.Owner(
         snakeboxed_bot,
-        pm2_name=config['settings']['pm2_name']
+        pm2_name=config['settings']['pm2_name'],
+        pm2_binary=config['settings']['pm2_binary']
     )
     snakeboxed_bot.add_cog(owner_cog)
     python_info_cog = snakeboxed.cogs.PythonInfo(
