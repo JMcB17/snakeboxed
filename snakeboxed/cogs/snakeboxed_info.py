@@ -1,4 +1,3 @@
-import asyncio
 from pathlib import Path
 
 import discord
@@ -131,7 +130,7 @@ class SnakeboxedInfo(commands.Cog):
             def after(error: Exception):
                 if error is not None:
                     raise error
-                asyncio.run(voice_client.disconnect())
+                self.bot.loop.create_task(voice_client.disconnect())
             voice_client.play(source, after=after)
 
     @commands.command(name='prefix', aliases=['prefixes', 'bot-prefix', 'bot-prefixes'])
