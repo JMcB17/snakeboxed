@@ -267,7 +267,6 @@ class Snekbox(commands.Cog):
         return code
 
     @commands.command(name='eval', aliases=('e', 'exec'))
-    @commands.guild_only()
     async def eval_command(self, ctx: commands.Context, *, code: str = None) -> None:
         """
         Run Python code and get the results.
