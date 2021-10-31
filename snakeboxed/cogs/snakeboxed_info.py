@@ -8,6 +8,7 @@ import snakeboxed
 
 GITHUB_LINK = 'https://github.com/JMcB17/snakeboxed'
 CREATOR_DISCORD_NAME = 'JMcB#7918'
+BOT_LIST_NAME = 'snakeboxed'
 BOT_PERMISSIONS = {
     'read_messages': True,
     'send_messages': True,
@@ -50,6 +51,15 @@ class SnakeboxedInfo(commands.Cog):
             f'<{GITHUB_LINK}/issues/new>'
         )
         return await ctx.send(bug_report_msg)
+
+    @commands.command()
+    async def vote(self, ctx: commands.Context):
+        """Upvote the bot. Completely optional.
+
+        Not on top.gg because they try to make you watch ads to vote.
+        Might take it off discordbotlist.com because they accept crypto related bots.
+        """
+        return await ctx.send(f'https://discordbotlist.com/bots/{BOT_LIST_NAME}/upvote')
 
     @commands.command(name='version', aliases=['V'])
     async def send_version_number(self, ctx: commands.Context):

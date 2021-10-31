@@ -21,14 +21,12 @@ from snakeboxed.bot import Snakeboxed
 #       stackoverflow error search
 # todo: allow .py text files as eval input
 # todo: allow message links as eval input
-# todo: lazy log formatting? ehhhh
 # todo: create privileged eval command for owner only
 # todo: docker image
 # todo: setup.py
-# todo: list on discord bot websites
 
 
-__version__ = '1.6.5'
+__version__ = '1.6.6'
 
 
 CONFIG_PATH = Path('config.toml')
