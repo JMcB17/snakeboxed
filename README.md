@@ -28,6 +28,8 @@ The most important command is `?eval`.
 print('hello world')
 ```
 
+![eval example](https://github.com/JMcB17/snakeboxed/blob/main/assets/eval-example.png)
+
 ## Get Snakeboxed
 
 ### Add the public instance of the bot

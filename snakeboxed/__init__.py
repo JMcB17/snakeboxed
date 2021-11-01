@@ -23,6 +23,7 @@ from snakeboxed.bot import Snakeboxed
 # todo: create privileged eval command for owner only
 # todo: docker image
 # todo: setup.py
+# todo: bug fix 3
 
 
 __version__ = '1.7.0'

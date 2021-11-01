@@ -45,6 +45,8 @@ class SnakeboxedInfo(commands.Cog):
     async def send_bug_report_links(self, ctx: commands.Context):
         """Send info on reporting bugs."""
         bug_report_msg = (
+            'Try the support server: \n'
+            'https://discord.gg/gQmvfRM3fA\n'
             'Message me on Discord: \n'
             f'{CREATOR_DISCORD_NAME}\n '
             'Open an issue on GitHub:\n '
@@ -52,7 +54,7 @@ class SnakeboxedInfo(commands.Cog):
         )
         return await ctx.send(bug_report_msg)
 
-    @commands.command()
+    @commands.command(aliases=['upvote', 'discordbotlist'])
     async def vote(self, ctx: commands.Context):
         """Upvote the bot. Completely optional.
 
@@ -134,6 +136,7 @@ class SnakeboxedInfo(commands.Cog):
         fp = SECRET_PATH / 'update_day.ogg'
 
         if ctx.author.voice is not None and ctx.author.voice.channel is not None:
+            # since it's just one file, could be slightly more efficient by not using probe
             source = await discord.FFmpegOpusAudio.from_probe(fp)
             voice_client = await ctx.author.voice.channel.connect()
 
