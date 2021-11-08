@@ -43,8 +43,8 @@ class Owner(commands.Cog):
                 update_file
             )
 
-        pip_upgrade_command = [sys.executable, 'install' '-r', REQUIREMENTS_FILE_PATH]
-        pull_command = [self.pm2_binary, 'pull', self.pm2_name]
+        pip_upgrade_command = [sys.executable, 'install' '-r', str(REQUIREMENTS_FILE_PATH)]
+        pull_command = [str(self.pm2_binary), 'pull', self.pm2_name]
         if commit_id is not None:
             pull_command.append(commit_id)
 
