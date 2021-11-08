@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -10,6 +11,7 @@ import snakeboxed
 
 
 UPDATE_FILE_PATH = Path('update.json')
+REQUIREMENTS_FILE_PATH = Path('requirements.txt')
 
 
 class Owner(commands.Cog):
@@ -41,17 +43,19 @@ class Owner(commands.Cog):
                 update_file
             )
 
+        pip_upgrade_command = [sys.executable, 'install' '-r', REQUIREMENTS_FILE_PATH]
         pull_command = [self.pm2_binary, 'pull', self.pm2_name]
         if commit_id is not None:
             pull_command.append(commit_id)
 
-        await ctx.send(f"```bash\n{' '.join(pull_command)}\n```")
-        # capture all output in command result stdout together
-        command_result_bytes = subprocess.run(
-            pull_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-        )
-        command_result = command_result_bytes.stdout.decode(encoding='utf_8')
-        await ctx.send(f'```\n{command_result}\n```')
+        for command in pip_upgrade_command, pull_command:
+            await ctx.send(f"```bash\n{' '.join(command)}\n```")
+            # capture all output in command result stdout together
+            command_result_bytes = subprocess.run(
+                command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            )
+            command_result = command_result_bytes.stdout.decode(encoding='utf-8')
+            await ctx.send(f'```\n{command_result}\n```')
 
     async def post_update(self):
         if not UPDATE_FILE_PATH.is_file():
