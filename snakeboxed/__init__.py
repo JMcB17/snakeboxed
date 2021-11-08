@@ -26,7 +26,7 @@ from snakeboxed.bot import Snakeboxed
 # todo: bug fix 3
 
 
-__version__ = '1.7.0'
+__version__ = '1.8.0'
 
 
 CONFIG_PATH = Path('config.toml')
@@ -80,6 +80,10 @@ def main():
         snekbox_port=config['settings']['snekbox_port']
     )
     snakeboxed_bot.add_cog(snekbox_cog)
+    steganographr_cog = snakeboxed.cogs.Steganographr(
+        snakeboxed_bot
+    )
+    snakeboxed_bot.add_cog(steganographr_cog)
 
     snakeboxed_bot.run(config['auth']['token'])
 
