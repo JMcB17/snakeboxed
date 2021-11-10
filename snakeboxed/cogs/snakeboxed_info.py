@@ -8,6 +8,7 @@ import snakeboxed
 
 GITHUB_LINK = 'https://github.com/JMcB17/snakeboxed'
 CREATOR_DISCORD_NAME = 'JMcB#7918'
+BOT_LIST_NAME = 'snakeboxed'
 BOT_PERMISSIONS = {
     'read_messages': True,
     'send_messages': True,
@@ -25,6 +26,7 @@ Code taken from python-discord/bot under the \
 <https://github.com/python-discord/bot>
 <https://github.com/python-discord/bot/blob/main/bot/exts/utils/snekbox.py>
 """
+SECRET_PATH = Path('assets/secret/')
 
 
 class SnakeboxedInfo(commands.Cog):
@@ -43,12 +45,23 @@ class SnakeboxedInfo(commands.Cog):
     async def send_bug_report_links(self, ctx: commands.Context):
         """Send info on reporting bugs."""
         bug_report_msg = (
+            'Try the support server: \n'
+            'https://discord.gg/gQmvfRM3fA\n'
             'Message me on Discord: \n'
             f'{CREATOR_DISCORD_NAME}\n '
             'Open an issue on GitHub:\n '
             f'<{GITHUB_LINK}/issues/new>'
         )
         return await ctx.send(bug_report_msg)
+
+    @commands.command(aliases=['upvote', 'discordbotlist'])
+    async def vote(self, ctx: commands.Context):
+        """Upvote the bot. Completely optional.
+
+        Not on top.gg because they try to make you watch ads to vote.
+        Might take it off discordbotlist.com because they accept crypto related bots.
+        """
+        return await ctx.send(f'https://discordbotlist.com/bots/{BOT_LIST_NAME}/upvote')
 
     @commands.command(name='version', aliases=['V'])
     async def send_version_number(self, ctx: commands.Context):
@@ -73,7 +86,7 @@ class SnakeboxedInfo(commands.Cog):
     @commands.command(name='poggers', aliases=['pog', 'lilianpoggers', 'lilianpog' 'lp'], hidden=True)
     async def lilian_poggers(self, ctx: commands.Context, f: str = 'ogg'):
         """???"""
-        fp_no_suffix = Path('assets/secret/lilian_poggers')
+        fp_no_suffix = SECRET_PATH / 'lilian_poggers'
         # ppl might use .mp4 for example
         f = f.strip('.')
         fp = fp_no_suffix.with_suffix(f'.{f}')
@@ -88,6 +101,50 @@ class SnakeboxedInfo(commands.Cog):
             return await ctx.send('yeah I do lol')
         else:
             return await ctx.send('what')
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.content.casefold() == 'el muchacho':
+            return await message.channel.send('https://youtu.be/GdtuG-j9Xog')
+
+    @commands.command(hidden=True, name='updateday')
+    async def update_day(self, ctx: commands.Context):
+        """Matt! Update day! New Wii titles!
+
+        Super Mario RPG
+        Sonic the Hedgehog, Donkey Kong 3
+        Adventures of Lolo 1 and 2
+        King's Knight, Dig Dug, Chew Man Fu
+
+        Harvest Moon
+        League Puzzle Pokémon
+        ToeJam & Earl in Panic on Funkotron
+
+        Castlevania, Fatal Fury, Ninja JaJaMaru-kun
+        ActRaiser, Blazing Lazers, Bases Loaded, Mega Turrican
+        Cybernator, Rolling Thunder, Dynastic Hero
+        Bubble Bobble, Double Dribble, Double Dragon, F-Zero
+
+        F-Zero X, and
+        Donkey Kong Jr. Math!
+
+        Ninja Gaiden 1
+        Ninja Gaiden 2
+        Ninja Gaiden 3
+        Cruis'n USA
+        """
+        fp = SECRET_PATH / 'update_day.ogg'
+
+        if ctx.author.voice is not None and ctx.author.voice.channel is not None:
+            # since it's just one file, could be slightly more efficient by not using probe
+            source = await discord.FFmpegOpusAudio.from_probe(fp)
+            voice_client = await ctx.author.voice.channel.connect()
+
+            def after(error: Exception):
+                if error is not None:
+                    raise error
+                self.bot.loop.create_task(voice_client.disconnect())
+            voice_client.play(source, after=after)
 
     @commands.command(name='prefix', aliases=['prefixes', 'bot-prefix', 'bot-prefixes'])
     async def send_bot_prefixes(self, ctx: commands.Context):

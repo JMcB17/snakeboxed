@@ -1,15 +1,7 @@
-import json
 import logging
-from pathlib import Path
 
 import aiohttp
-import discord.utils
 from discord.ext import commands
-
-import snakeboxed
-
-
-UPDATE_FILE_PATH = Path('update.json')
 
 
 log = logging.getLogger(__name__)
@@ -28,24 +20,6 @@ class Snakeboxed(commands.Bot):
 
         kwargs.setdefault('help_command', commands.DefaultHelpCommand(no_category='Help'))
         super().__init__(*args, **kwargs)
-
-    async def post_update(self):
-        if not UPDATE_FILE_PATH.is_file():
-            return
-        with open(UPDATE_FILE_PATH) as update_file:
-            update_location_ids = json.load(update_file)
-
-        update_guild: discord.Guild = self.get_guild(update_location_ids['guild'])
-        if update_guild is None:
-            return
-
-        update_channel: discord.TextChannel = discord.utils.get(
-            update_guild.channels, id=update_location_ids['channel']
-        )
-        if update_channel is None:
-            return
-
-        return await update_channel.send(snakeboxed.__version__)
 
     async def on_ready(self):
         self.http_session = aiohttp.ClientSession()
