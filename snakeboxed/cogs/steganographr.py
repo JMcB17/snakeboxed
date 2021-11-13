@@ -1,3 +1,5 @@
+from typing import Optional
+
 import steganographr
 from discord.ext import commands
 
@@ -14,6 +16,13 @@ class Steganographr(commands.Cog):
         return await ctx.send(steganographr.encode(public, private))
 
     @commands.command()
-    async def decode(self, ctx: commands.Context, *, public: str):
+    async def decode(self, ctx: commands.Context, *, public: Optional[str]):
         """Reveal the private message hidden within a public message."""
+        if public is not None:
+            pass
+        elif ctx.message.reference:
+            public = ctx.message.reference.resolved.content
+        else:
+            return
+
         return await ctx.send(steganographr.decode(public))
