@@ -31,6 +31,9 @@ RAW_CODE_REGEX = re.compile(
     r'\s*$',                                # any trailing whitespace until the end of the string
     re.DOTALL                               # '.' also matches newlines
 )
+# todo: improve?
+#       https://stackoverflow.com/questions/3458217/how-to-use-regular-expression-to-match-the-charset-string-in-html
+#       https://discord.com/developers/docs/reference#uploading-files
 PYTHON_CONTENT_TYPE = re.compile('text/x-python; charset=([a-z0-9-_]+)')
 
 SIGKILL = 9

@@ -2,8 +2,7 @@
                                             MIT License
 Applies to:
     - Copyright (c) 2018 Python Discord
-        - most of snakeboxed/cogs/snekbox.py
-        - most of snakeboxed/cogs/python_info.py
+        - snakeboxed/cogs/snekbox.py: except for Snekbox.output_to_discord_file
 ---------------------------------------------------------------------------------------------------
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

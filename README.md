@@ -56,7 +56,6 @@ https://github.com/python-discord/snekbox
 Code taken from python-discord/bot under the [Expat License/MIT License](https://github.com/JMcB17/snakeboxed/blob/main/LICENSE-THIRD-PARTY):    
 https://github.com/python-discord/bot    
 https://github.com/python-discord/bot/blob/main/bot/exts/utils/snekbox.py
-https://github.com/python-discord/bot/blob/main/bot/exts/info/doc/_cog.py
 
 Someone made a bot something like this already, but I like developing my own stuff, and mine strips out the structure of the python-discord bot more, and has simple self-hosting as well as a public instance you can use.    
 https://github.com/HassanAbouelela/evalbot

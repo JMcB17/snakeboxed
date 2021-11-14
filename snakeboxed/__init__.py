@@ -26,7 +26,7 @@ from snakeboxed.bot import Snakeboxed
 # todo: bug fix 3
 
 
-__version__ = '1.8.0'
+__version__ = '1.7.1'
 
 
 CONFIG_PATH = Path('config.toml')
