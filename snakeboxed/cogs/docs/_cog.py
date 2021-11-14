@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import sys
 import textwrap
 from collections import defaultdict
@@ -13,7 +14,6 @@ from discord.ext import commands
 from bot.api import ResponseCodeError
 from bot.bot import Bot
 from bot.converters import Inventory, PackageName, ValidURL, allowed_strings
-from bot.log import get_logger
 from bot.pagination import LinePaginator
 from bot.utils import scheduling
 from bot.utils.lock import SharedEvent, lock
@@ -24,7 +24,7 @@ from snakeboxed.cogs.docs import _batch_parser
 from snakeboxed.cogs.docs._inventory_parser import InvalidHeaderError, InventoryDict, fetch_inventory
 
 
-log = get_logger(__name__)
+log = logging.getLogger(__name__)
 
 
 # symbols with a group contained here will get the group prefixed on duplicates
@@ -128,7 +128,7 @@ class DocCog(commands.Cog):
                 self.doc_symbols[symbol_name] = doc_item
                 self.item_fetcher.add_item(doc_item)
 
-        log.trace(f"Fetched inventory for {package_name}.")
+        log.info(f"Fetched inventory for {package_name}.")
 
     async def update_or_reschedule_inventory(
         self,
@@ -286,7 +286,7 @@ class DocCog(commands.Cog):
 
         First check the DocRedisCache before querying the cog's `BatchParser`.
         """
-        log.trace(f"Building embed for symbol `{symbol_name}`")
+        log.info(f"Building embed for symbol `{symbol_name}`")
         if not self.refresh_event.is_set():
             log.debug("Waiting for inventories to be refreshed before processing item.")
             await self.refresh_event.wait()

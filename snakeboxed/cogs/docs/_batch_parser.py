@@ -140,7 +140,7 @@ class BatchParser:
 
         The coroutine will run as long as the queue is not empty, resetting `self._parse_task` to None when finished.
         """
-        log.trace("Starting queue parsing.")
+        log.info("Starting queue parsing.")
         try:
             while self._queue:
                 item, soup = self._queue.pop()
@@ -160,14 +160,14 @@ class BatchParser:
                         scheduling.create_task(
                             self.stale_inventory_notifier.send_warning(item), name="Stale inventory warning"
                         )
-                except Exception:
-                    log.exception(f"Unexpected error when handling {item}")
+                except Exception as error:
+                    log.exception(f"Unexpected error when handling {item}: {error}")
                 future.set_result(markdown)
                 del self._item_futures[item]
                 await asyncio.sleep(0.1)
         finally:
             self._parse_task = None
-            log.trace("Finished parsing queue.")
+            log.info("Finished parsing queue.")
 
     def _move_to_front(self, item: Union[QueueItem, _cog.DocItem]) -> None:
         """Move `item` to the front of the parse queue."""
@@ -178,7 +178,7 @@ class BatchParser:
         del self._queue[item_index]
 
         self._queue.append(queue_item)
-        log.trace(f"Moved {item} to the front of the queue.")
+        log.info(f"Moved {item} to the front of the queue.")
 
     def add_item(self, doc_item: _cog.DocItem) -> None:
         """Map a DocItem to its page so that the symbol will be parsed once the page is requested."""
