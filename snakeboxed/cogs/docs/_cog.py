@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 import sys
 import textwrap
@@ -14,7 +12,6 @@ from discord.ext import commands
 
 from bot.api import ResponseCodeError
 from bot.bot import Bot
-from bot.constants import MODERATION_ROLES, RedirectOutput
 from bot.converters import Inventory, PackageName, ValidURL, allowed_strings
 from bot.log import get_logger
 from bot.pagination import LinePaginator
@@ -23,10 +20,12 @@ from bot.utils.lock import SharedEvent, lock
 from bot.utils.messages import send_denial, wait_for_deletion
 from bot.utils.scheduling import Scheduler
 
-from . import NAMESPACE, PRIORITY_PACKAGES, _batch_parser, doc_cache
-from ._inventory_parser import InvalidHeaderError, InventoryDict, fetch_inventory
+from snakeboxed.cogs.docs import _batch_parser
+from snakeboxed.cogs.docs._inventory_parser import InvalidHeaderError, InventoryDict, fetch_inventory
+
 
 log = get_logger(__name__)
+
 
 # symbols with a group contained here will get the group prefixed on duplicates
 FORCE_PREFIX_GROUPS = (
@@ -37,7 +36,11 @@ FORCE_PREFIX_GROUPS = (
     "pdbcommand",
     "2to3fixer",
 )
-NOT_FOUND_DELETE_DELAY = RedirectOutput.delete_delay
+PRIORITY_PACKAGES = (
+    "python",
+)
+NAMESPACE = 'doc'
+NOT_FOUND_DELETE_DELAY = 15
 # Delay to wait before trying to reach a rescheduled inventory again, in minutes
 FETCH_RESCHEDULE_DELAY = SimpleNamespace(first=2, repeated=5)
 
@@ -267,8 +270,8 @@ class DocCog(commands.Cog):
                 log.warning(f"A network error has occurred when requesting parsing of {doc_item}.", exc_info=e)
                 return "Unable to parse the requested symbol due to a network error."
 
-            except Exception:
-                log.exception(f"An unexpected error has occurred when requesting parsing of {doc_item}.")
+            except Exception as error:
+                log.exception(f"An unexpected error has occurred when requesting parsing of {doc_item}: {error}.")
                 return "Unable to parse the requested symbol due to an error."
 
             if markdown is None:
@@ -369,7 +372,7 @@ class DocCog(commands.Cog):
         return inventory_url.removesuffix("/").rsplit("/", maxsplit=1)[0] + "/"
 
     @docs_group.command(name="setdoc", aliases=("s",))
-    @commands.has_any_role(*MODERATION_ROLES)
+    @commands.is_owner()
     @lock(NAMESPACE, COMMAND_LOCK_SINGLETON, raise_error=True)
     async def set_command(
         self,
@@ -417,7 +420,7 @@ class DocCog(commands.Cog):
         await ctx.send(f"Added the package `{package_name}` to the database and updated the inventories.")
 
     @docs_group.command(name="deletedoc", aliases=("removedoc", "rm", "d"))
-    @commands.has_any_role(*MODERATION_ROLES)
+    @commands.is_owner()
     @lock(NAMESPACE, COMMAND_LOCK_SINGLETON, raise_error=True)
     async def delete_command(self, ctx: commands.Context, package_name: PackageName) -> None:
         """
@@ -434,7 +437,7 @@ class DocCog(commands.Cog):
         await ctx.send(f"Successfully deleted `{package_name}` and refreshed the inventories.")
 
     @docs_group.command(name="refreshdoc", aliases=("rfsh", "r"))
-    @commands.has_any_role(*MODERATION_ROLES)
+    @commands.is_owner()
     @lock(NAMESPACE, COMMAND_LOCK_SINGLETON, raise_error=True)
     async def refresh_command(self, ctx: commands.Context) -> None:
         """Refresh inventories and show the difference."""
@@ -456,7 +459,7 @@ class DocCog(commands.Cog):
         await ctx.send(embed=embed)
 
     @docs_group.command(name="cleardoccache", aliases=("deletedoccache",))
-    @commands.has_any_role(*MODERATION_ROLES)
+    @commands.is_owner()
     async def clear_cache_command(
         self,
         ctx: commands.Context,

@@ -9,12 +9,14 @@ from typing import Deque, Dict, List, NamedTuple, Optional, Union
 import discord
 from bs4 import BeautifulSoup
 
-import bot
-from bot.constants import Channels
 from bot.utils import scheduling
 
 from snakeboxed.cogs.docs import _cog
 from snakeboxed.cogs.docs._parsing import get_symbol_markdown
+
+
+# todo: check
+DEV_LOG = 904403156442685461
 
 
 log = logging.getLogger(__name__)
@@ -25,18 +27,21 @@ class StaleInventoryNotifier:
 
     symbol_counter = StaleItemCounter()
 
-    def __init__(self):
+    # todo: type hint bot here and below
+    def __init__(self, bot):
+        self.bot = bot
+
         self._init_task = scheduling.create_task(
             self._init_channel(),
             name="StaleInventoryNotifier channel init",
-            event_loop=bot.instance.loop,
+            event_loop=self.bot.loop,
         )
         self._warned_urls = set()
 
     async def _init_channel(self) -> None:
         """Wait for guild and get channel."""
-        await bot.instance.wait_until_guild_available()
-        self._dev_log = bot.instance.get_channel(Channels.dev_log)
+        await self.bot.instance.wait_until_guild_available()
+        self._dev_log = self.bot.get_channel(DEV_LOG)
 
     async def send_warning(self, doc_item: _cog.DocItem) -> None:
         """Send a warning to dev log if one wasn't already sent for `item`'s url."""
@@ -87,13 +92,15 @@ class BatchParser:
     all of the symbols are queued to be parsed to avoid multiple web requests to the same page.
     """
 
-    def __init__(self):
+    def __init__(self, bot):
+        self.bot = bot
+
         self._queue: Deque[QueueItem] = collections.deque()
         self._page_doc_items: Dict[str, List[_cog.DocItem]] = defaultdict(list)
         self._item_futures: Dict[_cog.DocItem, ParseResultFuture] = defaultdict(ParseResultFuture)
         self._parse_task = None
 
-        self.stale_inventory_notifier = StaleInventoryNotifier()
+        self.stale_inventory_notifier = StaleInventoryNotifier(self.bot)
 
     async def get_markdown(self, doc_item: _cog.DocItem) -> Optional[str]:
         """
@@ -107,8 +114,8 @@ class BatchParser:
         if doc_item not in self._item_futures and doc_item not in self._queue:
             self._item_futures[doc_item].user_requested = True
 
-            async with bot.instance.http_session.get(doc_item.url, raise_for_status=True) as response:
-                soup = await bot.instance.loop.run_in_executor(
+            async with self.bot.http_session.get(doc_item.url, raise_for_status=True) as response:
+                soup = await self.bot.loop.run_in_executor(
                     None,
                     BeautifulSoup,
                     await response.text(encoding="utf8"),
@@ -145,7 +152,7 @@ class BatchParser:
                     continue
 
                 try:
-                    markdown = await bot.instance.loop.run_in_executor(None, get_symbol_markdown, soup, item)
+                    markdown = await self.bot.loop.run_in_executor(None, get_symbol_markdown, soup, item)
                     if markdown is not None:
                         await doc_cache.set(item, markdown)
                     else:
