@@ -1,3 +1,4 @@
+import logging
 import re
 import zlib
 from collections import defaultdict
@@ -5,10 +6,9 @@ from typing import AsyncIterator, DefaultDict, List, Optional, Tuple
 
 import aiohttp
 
-import bot
-from bot.log import get_logger
 
-log = get_logger(__name__)
+log = logging.getLogger(__name__)
+
 
 FAILED_REQUEST_ATTEMPTS = 3
 _V2_LINE_RE = re.compile(r'(?x)(.+?)\s+(\S*:\S*)\s+(-?\d+)\s+?(\S*)\s+(.*)')
@@ -80,29 +80,31 @@ async def _load_v2(stream: aiohttp.StreamReader) -> InventoryDict:
 async def _fetch_inventory(url: str) -> InventoryDict:
     """Fetch, parse and return an intersphinx inventory file from an url."""
     timeout = aiohttp.ClientTimeout(sock_connect=5, sock_read=5)
-    async with bot.instance.http_session.get(url, timeout=timeout, raise_for_status=True) as response:
-        stream = response.content
+    # todo: use the bot's http session like the ported code does
+    async with aiohttp.ClientSession() as http_session:
+        async with http_session.get(url, timeout=timeout, raise_for_status=True) as response:
+            stream = response.content
 
-        inventory_header = (await stream.readline()).decode().rstrip()
-        try:
-            inventory_version = int(inventory_header[-1:])
-        except ValueError:
-            raise InvalidHeaderError("Unable to convert inventory version header.")
+            inventory_header = (await stream.readline()).decode().rstrip()
+            try:
+                inventory_version = int(inventory_header[-1:])
+            except ValueError:
+                raise InvalidHeaderError("Unable to convert inventory version header.")
 
-        has_project_header = (await stream.readline()).startswith(b"# Project")
-        has_version_header = (await stream.readline()).startswith(b"# Version")
-        if not (has_project_header and has_version_header):
-            raise InvalidHeaderError("Inventory missing project or version header.")
+            has_project_header = (await stream.readline()).startswith(b"# Project")
+            has_version_header = (await stream.readline()).startswith(b"# Version")
+            if not (has_project_header and has_version_header):
+                raise InvalidHeaderError("Inventory missing project or version header.")
 
-        if inventory_version == 1:
-            return await _load_v1(stream)
+            if inventory_version == 1:
+                return await _load_v1(stream)
 
-        elif inventory_version == 2:
-            if b"zlib" not in await stream.readline():
-                raise InvalidHeaderError("'zlib' not found in header of compressed inventory.")
-            return await _load_v2(stream)
+            elif inventory_version == 2:
+                if b"zlib" not in await stream.readline():
+                    raise InvalidHeaderError("'zlib' not found in header of compressed inventory.")
+                return await _load_v2(stream)
 
-        raise InvalidHeaderError("Incompatible inventory version.")
+            raise InvalidHeaderError("Incompatible inventory version.")
 
 
 async def fetch_inventory(url: str) -> Optional[InventoryDict]:
@@ -127,9 +129,9 @@ async def fetch_inventory(url: str) -> Optional[InventoryDict]:
             )
         except InvalidHeaderError:
             raise
-        except Exception:
+        except Exception as error:
             log.exception(
-                f"An unexpected error has occurred during fetching of {url}; "
+                f"An unexpected error has occurred during fetching of {url}: {error}; "
                 f"trying again ({attempt}/{FAILED_REQUEST_ATTEMPTS})."
             )
         else:

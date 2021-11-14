@@ -1,25 +1,21 @@
-from __future__ import annotations
-
+import logging
 import re
 import string
 import textwrap
 from collections import namedtuple
-from typing import Collection, Iterable, Iterator, List, Optional, TYPE_CHECKING, Union
+from typing import Collection, Iterable, Iterator, List, Optional, Union
 
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
-from bot.log import get_logger
-from bot.utils.helpers import find_nth_occurrence
+from snakeboxed.cogs.docs import MAX_SIGNATURE_AMOUNT
+from snakeboxed.cogs.docs._html import get_dd_description, get_general_description, get_signatures
+from snakeboxed.cogs.docs._markdown import DocMarkdownConverter
+from snakeboxed.cogs.docs._cog import DocItem
 
-from . import MAX_SIGNATURE_AMOUNT
-from ._html import get_dd_description, get_general_description, get_signatures
-from ._markdown import DocMarkdownConverter
 
-if TYPE_CHECKING:
-    from ._cog import DocItem
+log = logging.getLogger(__name__)
 
-log = get_logger(__name__)
 
 _WHITESPACE_AFTER_NEWLINES_RE = re.compile(r"(?<=\n\n)(\s+)")
 _PARAMETERS_RE = re.compile(r"\((.+)\)")
@@ -48,6 +44,16 @@ _BRACKET_PAIRS = {
 }
 
 
+def find_nth_occurrence(text: str, substring: str, n: int) -> Optional[int]:
+    """Return index of `n`th occurrence of `substring` in `text`, or None if not found."""
+    index = 0
+    for _ in range(n):
+        index = text.find(substring, index + 1)
+        if index == -1:
+            return None
+    return index
+
+
 def _split_parameters(parameters_string: str) -> Iterator[str]:
     """
     Split parameters of a signature into individual parameter strings on commas.
@@ -64,6 +70,7 @@ def _split_parameters(parameters_string: str) -> Iterator[str]:
             # Skip everything inside of strings, regardless of the depth.
             quote_character = character  # The closing quote must equal the opening quote.
             preceding_backslashes = 0
+            # todo: ? weird variable names here
             for _, character in enumerated_string:
                 # If an odd number of backslashes precedes the quote, it was escaped.
                 if character == quote_character and not preceding_backslashes % 2:

@@ -1,3 +1,4 @@
+import logging
 import re
 from functools import partial
 from typing import Callable, Container, Iterable, List, Union
@@ -5,11 +6,9 @@ from typing import Callable, Container, Iterable, List, Union
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, PageElement, SoupStrainer, Tag
 
-from bot.log import get_logger
+from snakeboxed.cogs.docs import MAX_SIGNATURE_AMOUNT
 
-from . import MAX_SIGNATURE_AMOUNT
-
-log = get_logger(__name__)
+log = logging.getLogger(__name__)
 
 _UNWANTED_SIGNATURE_SYMBOLS_RE = re.compile(r"\[source]|\\\\|¶")
 _SEARCH_END_TAG_ATTRS = (

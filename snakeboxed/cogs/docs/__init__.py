@@ -1,17 +1,5 @@
-from bot.bot import Bot
-
-from ._redis_cache import DocRedisCache
-
+# todo: switch to single quotes
+#        only after rest of porting is done, cleaner history that way
+# todo: rename to DocsCog cause it's nicer
+from snakeboxed.cogs.docs._cog import DocCog
 MAX_SIGNATURE_AMOUNT = 3
-PRIORITY_PACKAGES = (
-    "python",
-)
-NAMESPACE = "doc"
-
-doc_cache = DocRedisCache(namespace=NAMESPACE)
-
-
-def setup(bot: Bot) -> None:
-    """Load the Doc cog."""
-    from ._cog import DocCog
-    bot.add_cog(DocCog(bot))

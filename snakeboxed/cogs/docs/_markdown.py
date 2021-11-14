@@ -5,7 +5,7 @@ from markdownify import MarkdownConverter
 
 
 class DocMarkdownConverter(MarkdownConverter):
-    """Subclass markdownify's MarkdownCoverter to provide custom conversion methods."""
+    """Subclass markdownify's MarkdownConverter to provide custom conversion methods."""
 
     def __init__(self, *, page_url: str, **options):
         super().__init__(**options)
