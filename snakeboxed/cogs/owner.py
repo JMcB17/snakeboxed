@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -10,12 +11,14 @@ import snakeboxed
 
 
 UPDATE_FILE_PATH = Path('update.json')
+REQUIREMENTS_FILE_PATH = Path('requirements.txt')
 
 
 class Owner(commands.Cog):
-    def __init__(self, bot: commands.Bot, pm2_name: str):
+    def __init__(self, bot: commands.Bot, pm2_name: str, pm2_binary: str):
         self.bot = bot
         self.pm2_name = pm2_name
+        self.pm2_binary = pm2_binary
 
     async def cog_check(self, ctx: commands.Context) -> bool:
         if not await ctx.bot.is_owner(ctx.author):
@@ -40,18 +43,19 @@ class Owner(commands.Cog):
                 update_file
             )
 
-        pull_command_list = ['pm2', 'pull', self.pm2_name]
+        pip_upgrade_command = [sys.executable, '-m', 'pip', 'install', '-r', str(REQUIREMENTS_FILE_PATH)]
+        pull_command = [str(self.pm2_binary), 'pull', self.pm2_name]
         if commit_id is not None:
-            pull_command_list.append(commit_id)
+            pull_command.append(commit_id)
 
-        pull_command = ' '.join(pull_command_list)
-        await ctx.send(f'```bash\n{pull_command}\n```')
-        # capture all output in command result stdout together
-        command_result_bytes = subprocess.run(
-            pull_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-        )
-        command_result = command_result_bytes.stdout.decode(encoding='utf_8')
-        await ctx.send(f'```\n{command_result}\n```')
+        for command in pip_upgrade_command, pull_command:
+            await ctx.send(f"```bash\n{' '.join(command)}\n```")
+            # capture all output in command result stdout together
+            command_result_bytes = subprocess.run(
+                command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            )
+            command_result = command_result_bytes.stdout.decode(encoding='utf-8')
+            await ctx.send(f'```\n{command_result}\n```')
 
     async def post_update(self):
         if not UPDATE_FILE_PATH.is_file():

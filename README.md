@@ -7,11 +7,14 @@ The public bot for learning Python together on Discord.
 
 ## Features
 - Run code and get the results all in Discord
+    - Results as embedded Discord text file
+    - Accepts python files as input
 - Links to Python resources
 - Written in Python and released as free software, so you can learn from the source code
 
 Work-in-progress features:
 - Search the documentation for Python and Python libraries in Discord
+- Accept message references as eval input
 
 ## Use Snakeboxed
 
@@ -24,6 +27,8 @@ The most important command is `?eval`.
 ?eval
 print('hello world')
 ```
+
+![eval example](https://github.com/JMcB17/snakeboxed/blob/main/assets/eval-example.png)
 
 ## Get Snakeboxed
 

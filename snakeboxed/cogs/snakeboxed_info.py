@@ -8,6 +8,7 @@ import snakeboxed
 
 GITHUB_LINK = 'https://github.com/JMcB17/snakeboxed'
 CREATOR_DISCORD_NAME = 'JMcB#7918'
+BOT_LIST_NAME = 'snakeboxed'
 BOT_PERMISSIONS = {
     'read_messages': True,
     'send_messages': True,
@@ -44,12 +45,23 @@ class SnakeboxedInfo(commands.Cog):
     async def send_bug_report_links(self, ctx: commands.Context):
         """Send info on reporting bugs."""
         bug_report_msg = (
+            'Try the support server: \n'
+            'https://discord.gg/gQmvfRM3fA\n'
             'Message me on Discord: \n'
             f'{CREATOR_DISCORD_NAME}\n '
             'Open an issue on GitHub:\n '
             f'<{GITHUB_LINK}/issues/new>'
         )
         return await ctx.send(bug_report_msg)
+
+    @commands.command(aliases=['upvote', 'discordbotlist'])
+    async def vote(self, ctx: commands.Context):
+        """Upvote the bot. Completely optional.
+
+        Not on top.gg because they try to make you watch ads to vote.
+        Might take it off discordbotlist.com because they accept crypto related bots.
+        """
+        return await ctx.send(f'https://discordbotlist.com/bots/{BOT_LIST_NAME}/upvote')
 
     @commands.command(name='version', aliases=['V'])
     async def send_version_number(self, ctx: commands.Context):
@@ -124,6 +136,7 @@ class SnakeboxedInfo(commands.Cog):
         fp = SECRET_PATH / 'update_day.ogg'
 
         if ctx.author.voice is not None and ctx.author.voice.channel is not None:
+            # since it's just one file, could be slightly more efficient by not using probe
             source = await discord.FFmpegOpusAudio.from_probe(fp)
             voice_client = await ctx.author.voice.channel.connect()
 

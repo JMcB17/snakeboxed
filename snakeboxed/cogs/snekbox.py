@@ -31,6 +31,10 @@ RAW_CODE_REGEX = re.compile(
     r'\s*$',                                # any trailing whitespace until the end of the string
     re.DOTALL                               # '.' also matches newlines
 )
+# todo: improve?
+#       https://stackoverflow.com/questions/3458217/how-to-use-regular-expression-to-match-the-charset-string-in-html
+#       https://discord.com/developers/docs/reference#uploading-files
+PYTHON_CONTENT_TYPE = re.compile('text/x-python; charset=([a-z0-9-_]+)')
 
 SIGKILL = 9
 REEVAL_EMOJI = '\U0001f501'  # :repeat:
@@ -78,6 +82,15 @@ class Snekbox(commands.Cog):
         output_discord_file = discord.File(output_bytes_io, filename=DISCORD_FILE_NAME)
 
         return output_discord_file
+
+    @staticmethod
+    async def code_from_attachments(message: discord.Message) -> Optional[str]:
+        for attachment in message.attachments:
+            content_type_match = re.match(PYTHON_CONTENT_TYPE, attachment.content_type)
+            if content_type_match:
+                encoding = content_type_match.group(1)
+                attachment_bytes = await attachment.read()
+                return attachment_bytes.decode(encoding=encoding)
 
     @staticmethod
     def prepare_input(code: str) -> str:
@@ -267,7 +280,7 @@ class Snekbox(commands.Cog):
         return code
 
     @commands.command(name='eval', aliases=('e', 'exec'))
-    async def eval_command(self, ctx: commands.Context, *, code: str = None) -> None:
+    async def eval_command(self, ctx: commands.Context, *, code: str = None):
         """
         Run Python code and get the results.
         This command supports multiple lines of code, including code wrapped inside a formatted code
@@ -283,17 +296,25 @@ class Snekbox(commands.Cog):
             )
             return
 
+        skip_input_prep = False
+        if not code:
+            code = await self.code_from_attachments(ctx.message)
+            skip_input_prep = True
+
         if not code:  # None or empty string
-            await ctx.send_help(ctx.command)
-            return
+            return await ctx.send_help(ctx.command)
 
         log.info(
-            f'Received code from {ctx.author} ({ctx.author.id}) in {ctx.guild} ({ctx.guild.id}) for evaluation:\n{code}'
+            f'Received code from '
+            f'{ctx.author} ({ctx.author.id}) '
+            f'in {ctx.guild} ({ctx.guild.id}) for evaluation:\n'
+            f'{code}'
         )
 
         while True:
             self.jobs[ctx.author.id] = datetime.datetime.now()
-            code = self.prepare_input(code)
+            if not skip_input_prep:
+                code = self.prepare_input(code)
             try:
                 response = await self.send_eval(ctx, code)
             finally:
