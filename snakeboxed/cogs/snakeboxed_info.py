@@ -59,7 +59,8 @@ class SnakeboxedInfo(commands.Cog):
         """Upvote the bot. Completely optional.
 
         Not on top.gg because they try to make you watch ads to vote.
-        Might take it off discordbotlist.com because they accept crypto related bots.
+        Might take it off discordbotlist.com because they accept crypto related bots
+        and their cookie consent popup is misleading.
         """
         return await ctx.send(f'https://discordbotlist.com/bots/{BOT_LIST_NAME}/upvote')
 
