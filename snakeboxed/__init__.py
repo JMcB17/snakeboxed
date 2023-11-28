@@ -3,9 +3,9 @@
 
 import logging
 import sys
+import tomllib
 from pathlib import Path
 
-import tomllib
 from discord.ext import commands
 
 import snakeboxed.cogs
@@ -55,28 +55,11 @@ def main():
     config = get_config()
 
     snakeboxed_bot = snakeboxed.Snakeboxed(
+        snekbox_url=config["settings"]["snekbox_url"],
         command_prefix=commands.when_mentioned_or(
             *config["settings"]["command_prefixes"]
-        )
+        ),
     )
-
-    # add all relevant cogs
-    owner_cog = snakeboxed.cogs.Owner(
-        snakeboxed_bot,
-        pm2_name=config["settings"]["pm2_name"],
-        pm2_binary=config["settings"]["pm2_binary"],
-    )
-    snakeboxed_bot.add_cog(owner_cog)
-    python_info_cog = snakeboxed.cogs.PythonInfo(snakeboxed_bot)
-    snakeboxed_bot.add_cog(python_info_cog)
-    snakeboxed_info_cog = snakeboxed.cogs.SnakeboxedInfo(snakeboxed_bot)
-    snakeboxed_bot.add_cog(snakeboxed_info_cog)
-    snekbox_cog = snakeboxed.cogs.Snekbox(
-        snakeboxed_bot,
-        snekbox_url=config["settings"]["snekbox_url"],
-        snekbox_port=config["settings"]["snekbox_port"],
-    )
-    snakeboxed_bot.add_cog(snekbox_cog)
 
     snakeboxed_bot.run(config["auth"]["token"])
 

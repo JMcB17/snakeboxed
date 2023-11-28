@@ -3,8 +3,4 @@ token = ""
 
 [settings]
 command_prefixes = ["?"]
-snekbox_url = "http://localhost"
-snekbox_port = 8060
-# you can ignore this if you're not using pm2 and the owner-only ?update command
-pm2_name = "snakeboxed"
-pm2_binary = "/usr/bin/pm2"
+snekbox_url = "http://localhost:8060"

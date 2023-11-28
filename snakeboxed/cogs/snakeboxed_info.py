@@ -144,7 +144,7 @@ class SnakeboxedInfo(commands.Cog):
 
         if ctx.author.voice is not None and ctx.author.voice.channel is not None:
             # since it's just one file, could be slightly more efficient by not using probe
-            source = await discord.FFmpegOpusAudio.from_probe(fp)
+            source = await discord.FFmpegOpusAudio.from_probe(str(fp))
             voice_client = await ctx.author.voice.channel.connect()
 
             def after(error: Exception):
@@ -177,5 +177,7 @@ class SnakeboxedInfo(commands.Cog):
         permissions = discord.Permissions()
         permissions.update(**BOT_PERMISSIONS)
 
-        invite_url = discord.utils.oauth_url(client_id, permissions, ctx.guild)
+        invite_url = discord.utils.oauth_url(
+            client_id, permissions=permissions, guild=ctx.guild
+        )
         await ctx.send(invite_url)

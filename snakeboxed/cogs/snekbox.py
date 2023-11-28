@@ -48,13 +48,12 @@ class Snekbox(commands.Cog):
 
     qualified_name = "Snekbox"
 
-    def __init__(self, bot: Snakeboxed, snekbox_url: str, snekbox_port: int):
+    def __init__(self, bot: Snakeboxed, snekbox_url: str):
         self.bot = bot
         self.jobs = {}
 
         self.snekbox_url = snekbox_url
-        self.snekbox_port = snekbox_port
-        self.snekbox_eval_api_url = f"{self.snekbox_url}:{self.snekbox_port}/eval"
+        self.snekbox_eval_api_url = f"{self.snekbox_url}/eval"
 
     async def post_eval(self, code: str) -> dict:
         """Send a POST request to the Snekbox API to evaluate code and return the results."""

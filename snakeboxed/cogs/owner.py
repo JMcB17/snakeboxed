@@ -13,6 +13,9 @@ UPDATE_FILE_PATH = Path("update.json")
 REQUIREMENTS_FILE_PATH = Path("requirements.txt")
 
 
+# todo rework, re-enable
+
+
 class Owner(commands.Cog):
     def __init__(self, bot: commands.Bot, pm2_name: str, pm2_binary: str):
         self.bot = bot
