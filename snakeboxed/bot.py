@@ -34,8 +34,8 @@ class Snakeboxed(commands.Bot):
         self.http_session = aiohttp.ClientSession()
 
         # add all relevant cogs
-        # owner_cog = snakeboxed.cogs.Owner(self)
-        # await self.add_cog(owner_cog)
+        owner_cog = snakeboxed.cogs.Owner(self)
+        await self.add_cog(owner_cog)
         python_info_cog = snakeboxed.cogs.PythonInfo(self)
         await self.add_cog(python_info_cog)
         snakeboxed_info_cog = snakeboxed.cogs.SnakeboxedInfo(self)

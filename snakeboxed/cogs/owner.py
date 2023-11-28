@@ -1,8 +1,6 @@
 import json
-import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
 
 import discord
 from discord.ext import commands
@@ -10,17 +8,12 @@ from discord.ext import commands
 import snakeboxed
 
 UPDATE_FILE_PATH = Path("update.json")
-REQUIREMENTS_FILE_PATH = Path("requirements.txt")
-
-
-# todo rework, re-enable
 
 
 class Owner(commands.Cog):
-    def __init__(self, bot: commands.Bot, pm2_name: str, pm2_binary: str):
+    # todo cog base superclass with bot attribute
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.pm2_name = pm2_name
-        self.pm2_binary = pm2_binary
 
     async def cog_check(self, ctx: commands.Context) -> bool:
         if not await ctx.bot.is_owner(ctx.author):
@@ -32,7 +25,7 @@ class Owner(commands.Cog):
         await self.post_update()
 
     @commands.command(hidden=True, aliases=["u"])
-    async def update(self, ctx: commands.Context, commit_id: Optional[str]):
+    async def update(self, ctx: commands.Context, exit_code: int = 0):
         """Update the bot."""
         await ctx.send(snakeboxed.__version__)
 
@@ -45,26 +38,9 @@ class Owner(commands.Cog):
                 update_file,
             )
 
-        pip_upgrade_command = [
-            sys.executable,
-            "-m",
-            "pip",
-            "install",
-            "-r",
-            str(REQUIREMENTS_FILE_PATH),
-        ]
-        pull_command = [str(self.pm2_binary), "pull", self.pm2_name]
-        if commit_id is not None:
-            pull_command.append(commit_id)
-
-        for command in pip_upgrade_command, pull_command:
-            await ctx.send(f"```bash\n{' '.join(command)}\n```")
-            # capture all output in command result stdout together
-            command_result_bytes = subprocess.run(
-                command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-            )
-            command_result = command_result_bytes.stdout.decode(encoding="utf-8")
-            await ctx.send(f"```\n{command_result}\n```")
+        # todo use bot.close instead maybe?
+        #      or handle SystemExit in runner
+        sys.exit(exit_code)
 
     async def post_update(self):
         if not UPDATE_FILE_PATH.is_file():
