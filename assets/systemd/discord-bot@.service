@@ -1,0 +1,13 @@
+[Unit]
+Description=%i Discord bot
+After=network.target
+
+[Service]
+WorkingDirectory=%h/src/%i
+ExecStartPre=/usr/bin/git pull
+ExecStartPre=%h/.local/bin/pipenv install
+ExecStart=%h/.local/bin/pipenv run python bot.py
+Restart=always
+
+[Install]
+WantedBy=default.target

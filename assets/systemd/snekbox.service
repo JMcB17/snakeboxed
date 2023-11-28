@@ -1,0 +1,12 @@
+[Unit]
+Description=Snekbox docker image
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStartPre=/usr/bin/docker pull ghcr.io/python-discord/snekbox
+ExecStart=/usr/bin/docker run --ipc=none --privileged -p 8060:8060 ghcr.io/python-discord/snekbox
+Restart=always
+
+[Install]
+WantedBy=default.target
