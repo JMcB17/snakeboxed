@@ -1,2 +1,3 @@
 import snakeboxed
+
 snakeboxed.main()

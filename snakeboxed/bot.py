@@ -18,12 +18,14 @@ class Snakeboxed(commands.Bot):
         # assigned in on_ready for async
         self.http_session = None
 
-        kwargs.setdefault('help_command', commands.DefaultHelpCommand(no_category='Help'))
+        kwargs.setdefault(
+            "help_command", commands.DefaultHelpCommand(no_category="Help")
+        )
         super().__init__(*args, **kwargs)
 
     async def on_ready(self):
         self.http_session = aiohttp.ClientSession()
-        log.info(f'ready as {self.user.name}')
+        log.info(f"ready as {self.user.name}")
 
     async def close(self):
         await super().close()

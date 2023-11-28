@@ -6,15 +6,15 @@ from discord.ext import commands
 import snakeboxed
 
 
-GITHUB_LINK = 'https://github.com/JMcB17/snakeboxed'
-CREATOR_DISCORD_NAME = 'JMcB#7918'
-BOT_LIST_NAME = 'snakeboxed'
+GITHUB_LINK = "https://github.com/JMcB17/snakeboxed"
+CREATOR_DISCORD_NAME = "JMcB#7918"
+BOT_LIST_NAME = "snakeboxed"
 BOT_PERMISSIONS = {
-    'read_messages': True,
-    'send_messages': True,
-    'add_reactions': True,
-    'attach_files': True,
-    'manage_messages': True,
+    "read_messages": True,
+    "send_messages": True,
+    "add_reactions": True,
+    "attach_files": True,
+    "manage_messages": True,
 }
 CREDITS = """\
 As with any programming, most of the work was done for me.
@@ -26,44 +26,47 @@ Code taken from python-discord/bot under the \
 <https://github.com/python-discord/bot>
 <https://github.com/python-discord/bot/blob/main/bot/exts/utils/snekbox.py>
 """
-SECRET_PATH = Path('assets/secret/')
+SECRET_PATH = Path("assets/secret/")
 
 
 class SnakeboxedInfo(commands.Cog):
     """Information about Snakeboxed bot."""
-    qualified_name = 'Snakeboxed Info'
+
+    qualified_name = "Snakeboxed Info"
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name='github', aliases=['github-link', 'git', 'source'])
+    @commands.command(name="github", aliases=["github-link", "git", "source"])
     async def send_github_link(self, ctx: commands.Context):
         """Send the GitHub link for this bot's source code."""
-        return await ctx.send(f'<{GITHUB_LINK}>')
+        return await ctx.send(f"<{GITHUB_LINK}>")
 
-    @commands.command(name='bugs', aliases=['bug', 'report-bug', 'report-bugs', 'bug-report'])
+    @commands.command(
+        name="bugs", aliases=["bug", "report-bug", "report-bugs", "bug-report"]
+    )
     async def send_bug_report_links(self, ctx: commands.Context):
         """Send info on reporting bugs."""
         bug_report_msg = (
-            'Try the support server: \n'
-            'https://discord.gg/gQmvfRM3fA\n'
-            'Message me on Discord: \n'
-            f'{CREATOR_DISCORD_NAME}\n '
-            'Open an issue on GitHub:\n '
-            f'<{GITHUB_LINK}/issues/new>'
+            "Try the support server: \n"
+            "https://discord.gg/gQmvfRM3fA\n"
+            "Message me on Discord: \n"
+            f"{CREATOR_DISCORD_NAME}\n "
+            "Open an issue on GitHub:\n "
+            f"<{GITHUB_LINK}/issues/new>"
         )
         return await ctx.send(bug_report_msg)
 
-    @commands.command(aliases=['upvote', 'discordbotlist'])
+    @commands.command(aliases=["upvote", "discordbotlist"])
     async def vote(self, ctx: commands.Context):
         """Upvote the bot. Completely optional.
 
         Not on top.gg because they try to make you watch ads to vote.
         Might take it off discordbotlist.com because they accept crypto related bots.
         """
-        return await ctx.send(f'https://discordbotlist.com/bots/{BOT_LIST_NAME}/upvote')
+        return await ctx.send(f"https://discordbotlist.com/bots/{BOT_LIST_NAME}/upvote")
 
-    @commands.command(name='version', aliases=['V'])
+    @commands.command(name="version", aliases=["V"])
     async def send_version_number(self, ctx: commands.Context):
         """Send the current version number for this bot."""
         return await ctx.send(snakeboxed.__version__)
@@ -81,15 +84,20 @@ class SnakeboxedInfo(commands.Cog):
         No! Hey! You're doing that thing again where you take everything I say out of context!
         You're trying to make it look like I think Coolsville sucks! No! Don't record that!
         """
-        return await ctx.send('You think Coolsville sucks?', file=discord.File('assets/secret/coolsville.png'))
+        return await ctx.send(
+            "You think Coolsville sucks?",
+            file=discord.File("assets/secret/coolsville.png"),
+        )
 
-    @commands.command(name='poggers', aliases=['pog', 'lilianpoggers', 'lilianpog' 'lp'], hidden=True)
-    async def lilian_poggers(self, ctx: commands.Context, f: str = 'ogg'):
+    @commands.command(
+        name="poggers", aliases=["pog", "lilianpoggers", "lilianpog" "lp"], hidden=True
+    )
+    async def lilian_poggers(self, ctx: commands.Context, f: str = "ogg"):
         """???"""
-        fp_no_suffix = SECRET_PATH / 'lilian_poggers'
+        fp_no_suffix = SECRET_PATH / "lilian_poggers"
         # ppl might use .mp4 for example
-        f = f.strip('.')
-        fp = fp_no_suffix.with_suffix(f'.{f}')
+        f = f.strip(".")
+        fp = fp_no_suffix.with_suffix(f".{f}")
 
         if fp.is_file():
             return await ctx.send(file=discord.File(fp))
@@ -98,16 +106,16 @@ class SnakeboxedInfo(commands.Cog):
     async def has(self, ctx: commands.Context):
         """what"""
         if await ctx.bot.is_owner(ctx.author):
-            return await ctx.send('yeah I do lol')
+            return await ctx.send("yeah I do lol")
         else:
-            return await ctx.send('what')
+            return await ctx.send("what")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.content.casefold() == 'el muchacho':
-            return await message.channel.send('https://youtu.be/GdtuG-j9Xog')
+        if message.content.casefold() == "el muchacho":
+            return await message.channel.send("https://youtu.be/GdtuG-j9Xog")
 
-    @commands.command(hidden=True, name='updateday')
+    @commands.command(hidden=True, name="updateday")
     async def update_day(self, ctx: commands.Context):
         """Matt! Update day! New Wii titles!
 
@@ -133,7 +141,7 @@ class SnakeboxedInfo(commands.Cog):
         Ninja Gaiden 3
         Cruis'n USA
         """
-        fp = SECRET_PATH / 'update_day.ogg'
+        fp = SECRET_PATH / "update_day.ogg"
 
         if ctx.author.voice is not None and ctx.author.voice.channel is not None:
             # since it's just one file, could be slightly more efficient by not using probe
@@ -144,20 +152,21 @@ class SnakeboxedInfo(commands.Cog):
                 if error is not None:
                     raise error
                 self.bot.loop.create_task(voice_client.disconnect())
+
             voice_client.play(source, after=after)
 
-    @commands.command(name='prefix', aliases=['prefixes', 'bot-prefix', 'bot-prefixes'])
+    @commands.command(name="prefix", aliases=["prefixes", "bot-prefix", "bot-prefixes"])
     async def send_bot_prefixes(self, ctx: commands.Context):
         """Send the command prefixes for this bot.
 
         Command prefixes are separated by newlines.
         """
         prefixes_list = ctx.bot.command_prefix(ctx.bot, ctx.message)
-        prefixes_list_no_role = [p for p in prefixes_list if '<@!' not in p]
-        prefixes = '\n'.join(prefixes_list_no_role)
+        prefixes_list_no_role = [p for p in prefixes_list if "<@!" not in p]
+        prefixes = "\n".join(prefixes_list_no_role)
         return await ctx.send(prefixes)
 
-    @commands.command(name='invite', aliases=['bot-invite', 'invite-bot'])
+    @commands.command(name="invite", aliases=["bot-invite", "invite-bot"])
     async def send_bot_invite(self, ctx: commands.Context):
         """Send a Discord bot invite for this bot.
 

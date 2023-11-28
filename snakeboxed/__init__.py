@@ -26,27 +26,27 @@ from snakeboxed.bot import Snakeboxed
 # todo: bug fix 3
 
 
-__version__ = '1.7.1'
+__version__ = "1.7.1"
 
 
-CONFIG_PATH = Path('config.toml')
-LOG_PATH = Path('info.log')
+CONFIG_PATH = Path("config.toml")
+LOG_PATH = Path("info.log")
 
 
 stream_handler = logging.StreamHandler(stream=sys.stdout)
-file_handler = logging.FileHandler(LOG_PATH, encoding='utf_8')
+file_handler = logging.FileHandler(LOG_PATH, encoding="utf_8")
 logging.basicConfig(
     level=logging.INFO,
     handlers=[
         stream_handler,
         file_handler,
-    ]
+    ],
 )
 log = logging.getLogger(__name__)
 
 
 def get_config() -> dict:
-    with open(CONFIG_PATH, encoding='utf_8') as config_file:
+    with open(CONFIG_PATH, encoding="utf_8") as config_file:
         config = toml.load(config_file)
     return config
 
@@ -56,33 +56,31 @@ def main():
     config = get_config()
 
     snakeboxed_bot = snakeboxed.Snakeboxed(
-        command_prefix=commands.when_mentioned_or(*config['settings']['command_prefixes'])
+        command_prefix=commands.when_mentioned_or(
+            *config["settings"]["command_prefixes"]
+        )
     )
 
     # add all relevant cogs
     owner_cog = snakeboxed.cogs.Owner(
         snakeboxed_bot,
-        pm2_name=config['settings']['pm2_name'],
-        pm2_binary=config['settings']['pm2_binary']
+        pm2_name=config["settings"]["pm2_name"],
+        pm2_binary=config["settings"]["pm2_binary"],
     )
     snakeboxed_bot.add_cog(owner_cog)
-    python_info_cog = snakeboxed.cogs.PythonInfo(
-        snakeboxed_bot
-    )
+    python_info_cog = snakeboxed.cogs.PythonInfo(snakeboxed_bot)
     snakeboxed_bot.add_cog(python_info_cog)
-    snakeboxed_info_cog = snakeboxed.cogs.SnakeboxedInfo(
-        snakeboxed_bot
-    )
+    snakeboxed_info_cog = snakeboxed.cogs.SnakeboxedInfo(snakeboxed_bot)
     snakeboxed_bot.add_cog(snakeboxed_info_cog)
     snekbox_cog = snakeboxed.cogs.Snekbox(
         snakeboxed_bot,
-        snekbox_url=config['settings']['snekbox_url'],
-        snekbox_port=config['settings']['snekbox_port']
+        snekbox_url=config["settings"]["snekbox_url"],
+        snekbox_port=config["settings"]["snekbox_port"],
     )
     snakeboxed_bot.add_cog(snekbox_cog)
 
-    snakeboxed_bot.run(config['auth']['token'])
+    snakeboxed_bot.run(config["auth"]["token"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

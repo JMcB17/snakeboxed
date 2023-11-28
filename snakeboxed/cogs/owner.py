@@ -10,8 +10,8 @@ from discord.ext import commands
 import snakeboxed
 
 
-UPDATE_FILE_PATH = Path('update.json')
-REQUIREMENTS_FILE_PATH = Path('requirements.txt')
+UPDATE_FILE_PATH = Path("update.json")
+REQUIREMENTS_FILE_PATH = Path("requirements.txt")
 
 
 class Owner(commands.Cog):
@@ -22,29 +22,36 @@ class Owner(commands.Cog):
 
     async def cog_check(self, ctx: commands.Context) -> bool:
         if not await ctx.bot.is_owner(ctx.author):
-            raise commands.NotOwner('You do not own this bot.')
+            raise commands.NotOwner("You do not own this bot.")
         return True
 
     @commands.Cog.listener()
     async def on_ready(self):
         await self.post_update()
 
-    @commands.command(hidden=True, aliases=['u'])
+    @commands.command(hidden=True, aliases=["u"])
     async def update(self, ctx: commands.Context, commit_id: Optional[str]):
         """Update the bot."""
         await ctx.send(snakeboxed.__version__)
 
-        with open(UPDATE_FILE_PATH, 'w') as update_file:
+        with open(UPDATE_FILE_PATH, "w") as update_file:
             json.dump(
                 {
-                    'guild': ctx.guild.id,
-                    'channel': ctx.channel.id,
+                    "guild": ctx.guild.id,
+                    "channel": ctx.channel.id,
                 },
-                update_file
+                update_file,
             )
 
-        pip_upgrade_command = [sys.executable, '-m', 'pip', 'install', '-r', str(REQUIREMENTS_FILE_PATH)]
-        pull_command = [str(self.pm2_binary), 'pull', self.pm2_name]
+        pip_upgrade_command = [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "-r",
+            str(REQUIREMENTS_FILE_PATH),
+        ]
+        pull_command = [str(self.pm2_binary), "pull", self.pm2_name]
         if commit_id is not None:
             pull_command.append(commit_id)
 
@@ -54,8 +61,8 @@ class Owner(commands.Cog):
             command_result_bytes = subprocess.run(
                 command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
             )
-            command_result = command_result_bytes.stdout.decode(encoding='utf-8')
-            await ctx.send(f'```\n{command_result}\n```')
+            command_result = command_result_bytes.stdout.decode(encoding="utf-8")
+            await ctx.send(f"```\n{command_result}\n```")
 
     async def post_update(self):
         if not UPDATE_FILE_PATH.is_file():
@@ -64,12 +71,12 @@ class Owner(commands.Cog):
             update_location_ids = json.load(update_file)
         UPDATE_FILE_PATH.unlink()
 
-        update_guild: discord.Guild = self.bot.get_guild(update_location_ids['guild'])
+        update_guild: discord.Guild = self.bot.get_guild(update_location_ids["guild"])
         if update_guild is None:
             return
 
         update_channel: discord.TextChannel = discord.utils.get(
-            update_guild.channels, id=update_location_ids['channel']
+            update_guild.channels, id=update_location_ids["channel"]
         )
         if update_channel is None:
             return
