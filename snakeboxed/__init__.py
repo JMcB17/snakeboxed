@@ -5,7 +5,7 @@ import logging
 import sys
 from pathlib import Path
 
-import toml
+import tomllib
 from discord.ext import commands
 
 import snakeboxed.cogs
@@ -45,8 +45,8 @@ log = logging.getLogger(__name__)
 
 
 def get_config() -> dict:
-    with open(CONFIG_PATH, encoding="utf_8") as config_file:
-        config = toml.load(config_file)
+    with open(CONFIG_PATH, "rb") as config_file:
+        config = tomllib.load(config_file)
     return config
 
 

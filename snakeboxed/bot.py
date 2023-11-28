@@ -1,9 +1,13 @@
 import logging
 
 import aiohttp
+from discord import Intents
 from discord.ext import commands
 
 log = logging.getLogger(__name__)
+
+INTENTS = Intents.default()
+INTENTS.message_content = True
 
 
 class Snakeboxed(commands.Bot):
@@ -20,7 +24,7 @@ class Snakeboxed(commands.Bot):
         kwargs.setdefault(
             "help_command", commands.DefaultHelpCommand(no_category="Help")
         )
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs, intents=INTENTS)
 
     async def on_ready(self):
         self.http_session = aiohttp.ClientSession()
