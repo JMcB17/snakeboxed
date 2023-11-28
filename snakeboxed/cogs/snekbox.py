@@ -14,7 +14,6 @@ from discord.ext import commands
 
 from snakeboxed.bot import Snakeboxed
 
-
 ESCAPE_REGEX = re.compile("[`\u202E\u200B]{3,}")
 FORMATTED_CODE_REGEX = re.compile(
     r"(?P<delim>(?P<block>```)|``?)"  # code delimiter: 1-3 backticks; (?P=block) only matches if it's a block

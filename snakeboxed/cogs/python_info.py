@@ -1,6 +1,5 @@
 from discord.ext import commands
 
-
 PYTHON_RESOURCES_HELP = """\
 https://www.python.org/
 Official Tutorial:

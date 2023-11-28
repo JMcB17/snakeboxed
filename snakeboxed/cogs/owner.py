@@ -9,7 +9,6 @@ from discord.ext import commands
 
 import snakeboxed
 
-
 UPDATE_FILE_PATH = Path("update.json")
 REQUIREMENTS_FILE_PATH = Path("requirements.txt")
 

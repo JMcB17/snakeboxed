@@ -1,8 +1,8 @@
 """Simple Discord bot for snekbox (sandboxed Python code execution), self-host or use a global instance."""
 
 
-import sys
 import logging
+import sys
 from pathlib import Path
 
 import toml
@@ -10,7 +10,6 @@ from discord.ext import commands
 
 import snakeboxed.cogs
 from snakeboxed.bot import Snakeboxed
-
 
 # todo: make class for config
 # todo: settings system for global hosting

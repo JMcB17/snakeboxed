@@ -5,7 +5,6 @@ from discord.ext import commands
 
 import snakeboxed
 
-
 GITHUB_LINK = "https://github.com/JMcB17/snakeboxed"
 CREATOR_DISCORD_NAME = "JMcB#7918"
 BOT_LIST_NAME = "snakeboxed"
