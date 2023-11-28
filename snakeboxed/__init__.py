@@ -53,6 +53,7 @@ def get_config() -> dict:
 def main():
     """Run an instance of the bot with config loaded from the toml file."""
     config = get_config()
+    formatter = logging.Formatter(logging.BASIC_FORMAT)
 
     snakeboxed_bot = snakeboxed.Snakeboxed(
         snekbox_url=config["settings"]["snekbox_url"],
@@ -61,7 +62,7 @@ def main():
         ),
     )
 
-    snakeboxed_bot.run(config["auth"]["token"])
+    snakeboxed_bot.run(config["auth"]["token"], log_formatter=formatter)
 
 
 if __name__ == "__main__":
